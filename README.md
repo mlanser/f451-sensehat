@@ -1,8 +1,8 @@
-# f451 Labs Enviro+ module
+# f451 Labs SenseHat module
 
 ## Overview
 
-The *f451 Labs Enviro+* module encapsulates the drivers for the [*Pimoroni Enviro+* HAT](https://shop.pimoroni.com/products/enviro?variant=31155658457171) within a single class. This module provides a standard set of methods to read sensor data and display content to the onboard 0.96" LCD (160x80).
+The *f451 Labs SenseHat* module encapsulates the drivers for the [*Raspberry Pi Sense HAT*](https://www.raspberrypi.com/documentation/accessories/sense-hat.html) within a single class. This module also provides a standard set of methods to read sensor data and display content to the onboard 8x8 LED display.
 
 ## Install
 
@@ -12,7 +12,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
 
 This module is dependent on the following libraries:
 
-- [enviroplus-python](https://github.com/pimoroni/enviroplus-python/)
+- [???](https://github.com/pimoroni/enviroplus-python/)
 
 ### Installing from Github using `pip`
 
@@ -21,13 +21,13 @@ You can use `pip install` to install this module directly from Github as follows
 Using HTTPS:
 
 ```bash
-$ pip install 'f451-enviro @ git+https://github.com/mlanser/f451-enviro.git'
+$ pip install 'f451-sensehat @ git+https://github.com/mlanser/f451-sensehat.git'
 ```
 
 Using SSH:
 
 ```bash
-$ pip install 'f451-enviro @ git+ssh://git@github.com:mlanser/f451-enviro.git'
+$ pip install 'f451-sensehat @ git+ssh://git@github.com:mlanser/f451-sensehat.git'
 ```
 
 ## How to use
@@ -36,8 +36,8 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
 
 ```Python
 # ??? ...
-enviro = Enviro()
+sensehat = SenseHat()
 
 # ... ???
-enviro = Enviro(....)
+sensehat = SenseHat(....)
 ```
