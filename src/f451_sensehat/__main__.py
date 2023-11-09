@@ -1,4 +1,4 @@
-"""Demo for using f451 Labs Enviro+ Module."""
+"""Demo for using f451 Labs SenseHat Module."""
 
 import time
 import sys
@@ -6,7 +6,7 @@ import asyncio
 from pathlib import Path
 from random import randint
 
-from f451_enviro.enviro import Enviro
+from f451_sensehat.sensehat import SenseHat
 
 try:
     import tomllib
