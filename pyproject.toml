@@ -4,7 +4,7 @@ build-backend = "flit_core.buildapi"
 
 [project]
 name = "f451-sensehat"
-description = "f451 Labs Sense HAT module"
+description = "f451 Labs SenseHat module"
 readme = "README.md"
 authors = [{name = "Martin Lanser", email = "martinlanser@gmail.com"}]
 license = {file = "LICENSE"}
@@ -21,7 +21,14 @@ requires-python = ">=3.9"
 dynamic = ["version"]
 
 [project.optional-dependencies]
-dev = ["black", "bumpver", "isort", "pip-tools", "pytest"]
+dev = [
+    "black", 
+    "bumpver", 
+    "isort", 
+    "pip-tools", 
+    "pytest",
+    "pytest-random"
+]
 
 [project.urls]
 Homepage = "https://github.com/mlanser/f451-sensehat"
@@ -42,12 +49,6 @@ tag = true
 push = false
 
 [tool.bumpver.file_patterns]
-"pyproject.toml" = [
-    'current_version = "{version}"',
-    'version = "{version}"'
-]
-"src/f451-sensehat/__init__.py" = ["{version}"]
-"README.md" = [
-    "{version}",
-    "{pep440_version}",
-]
+"pyproject.toml" = ['current_version = "{version}"']
+"src/f451_sensehat/__init__.py" = ['__version__ = "{version}"']
+"README.md" = ['v{version}$']
