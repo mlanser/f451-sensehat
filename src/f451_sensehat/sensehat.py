@@ -38,9 +38,6 @@ __all__ = [
     "KWD_DISPLAY",
     "KWD_PROGRESS",
     "KWD_SLEEP",
-    "KWD_DISPL_TOP_X",
-    "KWD_DISPL_TOP_Y",
-    "KWD_DISPL_TOP_BAR",
 ]
 
 
@@ -104,9 +101,6 @@ KWD_ROTATION = "ROTATION"
 KWD_DISPLAY = "DISPLAY"
 KWD_PROGRESS = "PROGRESS"
 KWD_SLEEP = "SLEEP"
-KWD_DISPL_TOP_X = "TOP_X"
-KWD_DISPL_TOP_Y = "TOP_Y"
-KWD_DISPL_TOP_BAR = "TOP_BAR"
 
 
 # =========================================================
@@ -145,27 +139,21 @@ class SenseHat:
         DISPLAY:    Default display mode [0...]
         PROGRESS:   Show progress bar - [0 = no, 1 = yes]
         SLEEP:      Number of seconds until LED goes to screen saver mode
-        TOP_X:      X coordinate for top-left corner on LED
-        TOP_Y:      Y coordinate for top-left corner on LED
-        TOP_BAR:    Height (in px) of top bar
 
     Methods:
         get_CPU_temp:       Get CPU temp which we then can use to compensate temp reads
-        get_proximity:      Get proximity value from sensor
         get_lux:            Get illumination value from sensor
         get_pressure:       Get barometric pressure from sensor
         get_humidity:       Get humidity from sensor
         get_temperature:    Get temperature from sensor
-        get_gas_data:       Get gas data from sensor
-        get_particles:      Get particle data from sensor
         display_init:       Initialize display so we can draw on it
-        display_on:         Turn 'on' LED
-        display_off:        Turn 'off' LED
-        display_blank:      Erase LED
-        display_reset:      Erase LED
-        display_sparkle:    Show random sparkles on LED
-        display_as_graph:   Display data as (sparkline) graph
-        display_as_text:    Display data as text (in columns)
+        display_on:         Turn 'on' LCD
+        display_off:        Turn 'off' LCD
+        display_blank:      Erase LCD
+        display_reset:      Erase LCD
+        display_sparkle:    Show random sparkles on LCD
+        display_graph:      Display data as graph
+        display_message:    
         display_progress:   Display progress bar
     """
     def __init__(self, *args, **kwargs):
@@ -180,7 +168,7 @@ class SenseHat:
         # We combine 'args' and 'kwargs' to allow users to provide the entire 
         # 'config' object and/or individual settings (which could override 
         # values in 'config').
-        settings = {**args[0], **kwargs} if args and type(args[0]) is dict else kwargs
+        settings = {**args[0], **kwargs} if args and isinstance(args[0], dict) else kwargs
 
         bus = SMBus(1)
         self._BME280 = BME280(i2c_dev=bus)                  # BME280 temperature, pressure, humidity sensor
@@ -276,24 +264,6 @@ class SenseHat:
         """Get temperature data from BME280"""
         return self._BME280.get_temperature()
 
-    def get_gas_data(self):
-        return self._GAS.read_all()
-
-    def get_particles(self):
-        """Get particle data from PMS5003"""
-        try:
-            data = self._PMS5003.read()
-
-        except pmsReadTimeoutError:
-            time.sleep(1)
-            self._PMS5003.reset()
-            data = self._PMS5003.read()
-
-        except SerialTimeoutError as e:
-            raise SenseHatError(f"PMS5003 Error: {e}")
-
-        return data
-
     def update_sleep_mode(self, *args):
         """Enable or disable LED sleep mode
 
@@ -359,7 +329,7 @@ class SenseHat:
         """Reset and clear LED"""
         self.display_init()
 
-    def display_as_graph(self, data):
+    def display_graph(self, data):
         """Display graph and data point as text label
         
         This method will redraw the entire LED
@@ -406,20 +376,13 @@ class SenseHat:
 
         self._LED.display(self._img)
 
-    def display_as_text(self, data):
-        """Display graph and data point as text label
+    def display_message(self, msg):
+        """Display text message
         
-        This method will redraw the entire LED
+        This method will redraw the entire LCD
 
         Args:
-            data:
-                'list' of data rows where each row is a 'dict' as follows:
-                    {
-                        "data": [list of values],
-                        "unit" <unit string>,
-                        "label": <label string>,
-                        "limit": [list of limits]
-                    }    
+            msg: 'str' with text to display
         """
         # Skip this if we're in 'sleep' mode
         if self.displSleepMode:
@@ -427,27 +390,15 @@ class SenseHat:
 
         # Reserve space for progress bar?
         yMin = 2 if (self.displProgress) else 0
-        self._draw.rectangle((0, yMin, self._LED.width, self._LED.height), RGB_BLACK)
+        self._draw.rectangle((0, yMin, self._LCD.width, self._LCD.height), RGB_BLACK)
 
-        cols = 2
-        rows = (len(data) / cols)
+        # Draw message
+        x = DEF_LCD_OFFSET_X
+        y = DEF_LCD_OFFSET_Y + int((self._LCD.height - FONT_SIZE_LG) / 2)
+        self._draw.text((x, y), str(msg), font=self._fontLG, fill=COLOR_TXT)
 
-        for idx, item in enumerate(data):
-            x = DEF_LED_OFFSET_X + ((self._LED.width // cols) * (idx // rows))
-            y = DEF_LED_OFFSET_Y + ((self._LED.height / rows) * (idx % rows))
-            
-            message = "{}: {:.1f} {}".format(item["label"][:4], item["data"][-1], item["unit"])
-            
-            lim = item["limits"]
-            rgb = COLOR_PALETTE[0]
-
-            for j in range(len(lim)):
-                if item["data"][-1] > lim[j]:
-                    rgb = COLOR_PALETTE[j + 1]
-
-            self._draw.text((x, y), message, font=self._fontSM, fill=rgb)
-
-        self._LED.display(self._img)
+        # Display results
+        self._LCD.display(self._img)
 
     def display_progress(self, inFrctn=0.0):
         """Update progressbar on LED
@@ -473,16 +424,24 @@ class SenseHat:
 
     def display_sparkle(self):
         """Show random sparkles on LED"""
-        pass
-        # x = randint(0, 7)
-        # y = randint(0, 7)
-        # r = randint(0, 255)
-        # g = randint(0, 255)
-        # b = randint(0, 255)
+        # Skip this if we're in 'sleep' mode
+        if self.displSleepMode:
+            return
 
-        # toggle = randint(0, 3)
+        # Reserve space for progress bar?
+        yMin = 2 if (self.displProgress) else 0
 
-        # if toggle != 0:
-        #     self.enviro.set_pixel(x, y, r, g, b)
-        # else:    
-        #     self.enviro.clear()
+        # Create sparkles
+        x = randint(0, self._LCD.width - 1)
+        y = randint(yMin, self._LCD.height - 1)
+        r = randint(0, 255)
+        g = randint(0, 255)
+        b = randint(0, 255)
+
+        # Do we want to clear the screen? Or add more sparkles?
+        maxSparkle = int(self._LCD.width * self._LCD.height * MAX_SPARKLE_PCNT)
+        if randint(0, maxSparkle):
+            self._draw.point((x, y), (r, g, b))
+            self._LCD.display(self._img)
+        else:    
+            self._draw.rectangle((0, yMin, self._LCD.width, self._LCD.height), RGB_BLACK)
