@@ -34,7 +34,7 @@ dev = [
 Homepage = "https://github.com/mlanser/f451-sensehat"
 
 [project.scripts]
-realpython = "sensehat.__main__:main"
+f451_sensehat = "f451_sensehat.__main__:main"
 
 [tool.bumpver]
 current_version = "0.0.1"

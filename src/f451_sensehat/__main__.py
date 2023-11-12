@@ -1,46 +1,43 @@
 """Demo for using f451 Labs SenseHat Module."""
 
 import time
-import sys
-import asyncio
-from pathlib import Path
-from random import randint
-
 from f451_sensehat.sensehat import SenseHat
-
-try:
-    import tomllib
-except ModuleNotFoundError:
-    import tomli as tomllib
-
-
-# =========================================================
-#          G L O B A L S   A N D   H E L P E R S
-# =========================================================
 
 
 # =========================================================
 #                    D E M O   A P P
 # =========================================================
 def main():
-    # Get app dir
-    appDir = Path(__file__).parent
-
-    # Initialize TOML parser and load 'settings.toml' file
-    try:
-        with open(appDir.joinpath("settings.toml"), mode="rb") as fp:
-            config = tomllib.load(fp)
-    except tomllib.TOMLDecodeError:
-        sys.exit("Invalid 'settings.toml' file")      
-
     # Initialize device instance which includes all sensors
-    # an d LCD display on Enviro+
-    enviro = Enviro(config)
-    enviro.display_init()
+    # and LED display on Sense HAT
+    sense = SenseHat({
+        "ROTATION": 90,
+        "DISPLAY": 0,
+        "PROGRESS": 0,
+        "SLEEP": 600    
+    })
 
-    tempRaw = enviro.get_temperature()
-    pressRaw = enviro.get_pressure()
-    humidRaw = enviro.get_humidity()
+    # Skip display demos if we're using fake HAT
+    if not sense.is_fake():
+        sense.display_init()
+
+        # Display text on LCD
+        sense.display_message("Hello world!")
+
+        for _ in range(100):
+            sense.display_sparkle()
+            time.sleep(0.2)
+
+        sense.display_blank()
+        sense.display_off()
+
+    else:
+        print("\nSkipping LED demo since we don't have a real Sense HAT")
+
+    # Get enviro data, even if it's fake
+    tempRaw = round(sense.get_temperature(), 1)
+    pressRaw = round(sense.get_pressure(), 1)
+    humidRaw = round(sense.get_humidity(), 1)
 
     print("\n===== [Demo of f451 Labs Enviro+ Module] ======")
     print(f"TEMP:     {tempRaw} C")

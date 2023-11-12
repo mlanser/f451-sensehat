@@ -42,6 +42,7 @@ class FakeSenseHat:
         self.low_light = True
         self.rotation = 0
         self.stick = Stick()
+        self.fake = True
 
     def clear(self):
         pass
