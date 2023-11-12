@@ -11,7 +11,7 @@ def main():
     # Initialize device instance which includes all sensors
     # and LED display on Sense HAT
     sense = SenseHat({
-        "ROTATION": 90,
+        "ROTATION": 0,
         "DISPLAY": 0,
         "PROGRESS": 0,
         "SLEEP": 600    
@@ -21,7 +21,7 @@ def main():
     if not sense.is_fake():
         sense.display_init()
 
-        # Display text on LCD
+        # Display text on 8x8 LED
         sense.display_message("Hello world!")
 
         for _ in range(100):

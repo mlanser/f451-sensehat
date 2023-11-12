@@ -14,22 +14,16 @@ Dependencies:
  - Raspberry Pi Sense HAT library: https://github.com/pimoroni/enviroplus-python/  
 """
 
-import time
 import colorsys
 
 from random import randint
 
-from PIL import Image
-from PIL import ImageDraw
-from PIL import ImageFont
-from fonts.ttf import RobotoMedium
-
 from subprocess import PIPE, Popen
 
 try:
-    from sense_hat import SenseHat, ACTION_PRESSED, ACTION_HELD, ACTION_RELEASED
+    from sense_hat import SenseHat as RPISenseHat, ACTION_PRESSED, ACTION_HELD, ACTION_RELEASED
 except ImportError:
-    from .fake_HAT import FakeSenseHat as SenseHat, ACTION_PRESSED, ACTION_HELD, ACTION_RELEASED
+    from .fake_HAT import FakeSenseHat as RPISenseHat, ACTION_PRESSED, ACTION_HELD, ACTION_RELEASED
 
 __all__ = [
     "SenseHat",
@@ -38,6 +32,11 @@ __all__ = [
     "KWD_DISPLAY",
     "KWD_PROGRESS",
     "KWD_SLEEP",
+    "BTN_UP",
+    "BTN_DWN",
+    "BTN_LFT",
+    "BTN_RHT",
+    "BTN_MDL",
 ]
 
 
@@ -47,18 +46,21 @@ __all__ = [
 DEF_ROTATION = 0        # Default display rotation
 DEF_DISPL_MODE = 0      # Default display mode
 DEF_SLEEP = 600         # Default time to sleep (in seconds)
-DEF_LED_OFFSET_X = 1    # Default horizontal offset for LED
-DEF_LED_OFFSET_Y = 1    # Default vertical offseet for LED 
+DEF_LED_OFFSET_X = 0    # Default horizontal offset for LED
+DEF_LED_OFFSET_Y = 0    # Default vertical offseet for LED 
 
 STATUS_ON = True
 STATUS_OFF = False
 
-DISPL_TOP_X = 2         # X/Y ccordinate of top-left corner for LED content
-DISPL_TOP_Y = 2
-DISPL_TOP_BAR = 21      # Height (in px) of top bar
+DISPL_TOP_X = 0         # X/Y ccordinate of top-left corner for LED content
+DISPL_TOP_Y = 0
+DISPL_MAX_COL = 8       # sense has an 8x8 LED display
+DISPL_MAX_ROW = 8
 
 PROX_DEBOUNCE = 0.5     # Delay to debounce proximity sensor on 'tap'
 PROX_LIMIT = 1500       # Threshold for proximity sensor to detect 'tap'
+
+MAX_SPARKLE_PCNT = 0.1  # 10% sparkles
 
 RGB_BLACK = (0, 0, 0)
 RGB_WHITE = (255, 255, 255)
@@ -87,11 +89,13 @@ COLOR_BG = RGB_BLACK    # Default background
 COLOR_TXT = RGB_CHROME  # Default text on background
 COLOR_PBAR = RGB_CYAN   # Default progress bar 
 
-FONT_SIZE_SM = 10       # Small font size
-FONT_SIZE_MD = 16       # Medium font size
-FONT_SIZE_LG = 20       # Large font size
-
 ROTATE_90 = 90          # Rotate 90 degrees    
+
+BTN_UP = 0
+BTN_DWN = 0
+BTN_LFT = 0
+BTN_RHT = 0
+BTN_MDL = 0
 
 
 # =========================================================
@@ -117,12 +121,16 @@ class SenseHatError(Exception):
 class SenseHat:
     """Main SenseHat for managing the Raspberry Pi Sense HAT.
 
-    This class encapsulates all methods required to interact with
-    the sensors and the LED on the Raspberry Pi Sense HAT.
+    This class encapsulates all methods required to interact with the 
+    sensors and the LED on the Raspberry Pi Sense HAT.
 
-    NOTE: attributes follow same naming convention as used 
-    in the 'settings.toml' file. This makes it possible to pass 
-    in the 'config' object (or any other dict) as is.
+    NOTE: some methods are not needed, but are kept to maintain a basic 
+    level of compatibility with f451 Labs modules for other HATs and/or 
+    displays (e.g. f451-enviro, etc.).
+
+    NOTE: attributes follow same naming convention as used in the 
+    'settings.toml' file. This makes it possible to pass in the 'config' 
+    object (or any other dict) as is.
 
     NOTE: we let users provide an entire 'dict' object with settings as 
     key-value pairs, or as individual settings. User can combine both and,
@@ -147,13 +155,14 @@ class SenseHat:
         get_humidity:       Get humidity from sensor
         get_temperature:    Get temperature from sensor
         display_init:       Initialize display so we can draw on it
-        display_on:         Turn 'on' LCD
-        display_off:        Turn 'off' LCD
-        display_blank:      Erase LCD
-        display_reset:      Erase LCD
-        display_sparkle:    Show random sparkles on LCD
-        display_graph:      Display data as graph
-        display_message:    
+        display_on:         Turn 'on' LED
+        display_off:        Turn 'off' LED
+        display_blank:      Erase LED
+        display_reset:      Erase LED
+        display_sparkle:    Show random sparkles on LED
+        display_as_graph:   Display data as graph
+        display_as_text:    Dummy - for compatibility
+        display_message:    Display text message
         display_progress:   Display progress bar
     """
     def __init__(self, *args, **kwargs):
@@ -170,15 +179,7 @@ class SenseHat:
         # values in 'config').
         settings = {**args[0], **kwargs} if args and isinstance(args[0], dict) else kwargs
 
-        bus = SMBus(1)
-        self._BME280 = BME280(i2c_dev=bus)                  # BME280 temperature, pressure, humidity sensor
-
-        self._PMS5003 = PMS5003()                           # PMS5003 particulate sensor
-        self._LTR559 = ltr559                               # Proximity sensor
-        self._GAS = gas                                     # Sense HAT
-
-        # Initialize LED and canvas
-        self._LED = self._init_LED(**settings)              # ST7735 0.96" 160x80 LED
+        self._SENSE = self._init_SENSE(**settings)
 
         self.displRotation = settings.get(KWD_ROTATION, DEF_ROTATION)
         self.displMode = settings.get(KWD_DISPLAY, DEF_DISPL_MODE)
@@ -187,36 +188,65 @@ class SenseHat:
         self.displSleepTime = settings.get(KWD_SLEEP, DEF_SLEEP)
         self.displSleepMode = False
         
-        self.displTopX = settings.get(KWD_DISPL_TOP_X, DISPL_TOP_X)
-        self.displTopY = settings.get(KWD_DISPL_TOP_Y, DISPL_TOP_Y)
-        self.displTopBar = settings.get(KWD_DISPL_TOP_BAR, DISPL_TOP_BAR)
-
-        self._img = None
-        self._draw = None
-        self._fontLG = None
-        self._fontSM = None
+        self.displTopX = DISPL_TOP_X
+        self.displTopY = DISPL_TOP_Y
 
     @property
     def widthLED(self):
-        return self._LED.width
+        return DISPL_MAX_COL
     
     @property
     def heightLED(self):
-        return self._LED.height
+        return DISPL_MAX_ROW
 
-    def _init_LED(self, **kwargs):
-        """Initialize LED on Sense HAT"""
-        st7735 = ST7735.ST7735(
-            port = 0,
-            cs = 1,
-            dc = 9,
-            backlight = 12,
-            rotation = kwargs.get(KWD_ROTATION, DEF_ROTATION),
-            spi_speed_hz = 10000000
-        )
-        st7735.begin()
+    def _init_SENSE(self, **kwargs):
+        """Initialize SenseHat
 
-        return st7735
+        Initialize the SenseHat device, set some 
+        default parameters, and clear LED.
+        """
+        sense = RPISenseHat()
+        
+        sense.set_imu_config(False, False, False)                   # Disable IMU functions
+        sense.low_light = True
+        sense.clear()                                               # Clear 8x8 LED
+        sense.set_rotation(kwargs.get(KWD_ROTATION, DEF_ROTATION))  # Set initial rotation
+
+        sense.stick.direction_up = self._pushed_up
+        sense.stick.direction_down = self._pushed_down
+        sense.stick.direction_left = self._pushed_left
+        sense.stick.direction_right = self._pushed_right
+        sense.stick.direction_middle = self._pushed_middle
+
+        return sense
+
+    def _pushed_up(self, event):
+        """SenseHat Joystick UP event"""
+        if event.action != ACTION_RELEASED:
+            return BTN_UP
+
+    def _pushed_down(self, event):
+        """SenseHat Joystick DOWN event"""
+        if event.action != ACTION_RELEASED:
+            return BTN_DWN
+
+    def _pushed_left(self, event):
+        """SenseHat Joystick LEFT event"""
+        if event.action != ACTION_RELEASED:
+            return BTN_LFT
+
+    def _pushed_right(self, event):
+        """SenseHat Joystick RIGHT event"""
+        if event.action != ACTION_RELEASED:
+            return BTN_RHT
+
+    def _pushed_middle(self, event):
+        """SenseHat Joystick MIDDLE (down) event"""
+        if event.action != ACTION_RELEASED:
+            return BTN_MDL
+
+    def is_fake(self):
+        return getattr(self._SENSE, 'fake', False)
 
     def get_CPU_temp(self, strict=True):
         """Get CPU temp
@@ -246,23 +276,25 @@ class SenseHat:
         
     def get_proximity(self):
         """Get proximity from LTR559 sensor"""
-        return self._LTR559.get_proximity()
+        # return self._LTR559.get_proximity()
+        pass
     
     def get_lux(self):
         """Get illumination from LTR559 sensor"""
-        return self._LTR559.get_lux()
+        # return self._LTR559.get_lux()
+        pass
 
     def get_pressure(self):
-        """Get air pressure data from BME280 sensor"""
-        return self._BME280.get_pressure()
+        """Get air pressure data from Sense HAT sensor"""
+        return self._SENSE.get_pressure()
 
     def get_humidity(self):
-        """Get humidity data from BME280 sensor"""
-        return self._BME280.get_humidity()
+        """Get humidity data from Sense HAT sensor"""
+        return self._SENSE.get_humidity()
 
     def get_temperature(self):
-        """Get temperature data from BME280"""
-        return self._BME280.get_temperature()
+        """Get temperature data from Sense HAT sensor"""
+        return self._SENSE.get_temperature()
 
     def update_sleep_mode(self, *args):
         """Enable or disable LED sleep mode
@@ -284,32 +316,18 @@ class SenseHat:
             self.display_on()
 
     def display_init(self):
-        """Initialize LED drawing area
-        
-        This only initializes the drawing area without actually 
-        drawing or displying anything on the LED. So we can/should 
-        do this regardless of sleep mode.
-        """
-        self._img = Image.new(
-            'RGB', 
-            (self._LED.width, self._LED.height), 
-            color = RGB_BLACK
-        )
-        self._draw = ImageDraw.Draw(self._img)
-        self._fontLG = ImageFont.truetype(RobotoMedium, FONT_SIZE_LG)
-        self._fontMD = ImageFont.truetype(RobotoMedium, FONT_SIZE_MD)
-        self._fontSM = ImageFont.truetype(RobotoMedium, FONT_SIZE_SM)
+        """Initialize LED drawing area"""
+        self.display_on()
 
     def display_on(self):
         """Turn 'on' LED display"""
+        self._SENSE.low_light = True
         self.displSleepMode = False     # Reset 'sleep mode' flag
-        self._LED.display_on()
         self.display_blank()
 
     def display_off(self):
         """Turn 'off' LED display"""
         self.display_blank()
-        self._LED.display_off()
         self.displSleepMode = True      # Set 'sleep mode' flag
         
     def display_blank(self):
@@ -318,21 +336,23 @@ class SenseHat:
         if self.displSleepMode:
             return
         
-        img = Image.new(
-            'RGB', 
-            (self._LED.width, self._LED.height), 
-            color = RGB_BLACK
-        )
-        self._LED.display(img)
+        self._SENSE.clear()             # Clear 8x8 LED
 
     def display_reset(self):
         """Reset and clear LED"""
-        self.display_init()
+        self._SENSE.low_light = False
+        self._SENSE.clear()             # Clear 8x8 LED
 
-    def display_graph(self, data):
+    def display_as_graph(self, data):
         """Display graph and data point as text label
         
-        This method will redraw the entire LED
+        This method will redraw the entire 8x8 LED all at once. That means
+        we need to create a list of 64 RGB tuples, and then send the list 
+        to the Sense HAT 'set_pixels()' method.
+
+        NOTE: the data structure is more complex than we need for Sense HAT 
+        devices. But we want to maintain a basic level of compatibility with 
+        other f451 Labs modules.
 
         Args:
             data:
@@ -344,42 +364,54 @@ class SenseHat:
                         "limit": [list of limits]
                     }    
         """
+        def _get_rgb(val, curRow, maxRow):
+            # Should the pixel on this row be black?
+            if curRow < (maxRow - int(val * maxRow)):
+                return RGB_BLACK
+            
+            # Convert the values to colors from red to blue
+            color = (1.0 - val) * 0.6
+            return tuple([int(x * 255.0) for x in colorsys.hsv_to_rgb(color, 1.0, 1.0)])
+
         # Skip this if we're in 'sleep' mode
         if self.displSleepMode:
             return
 
-        # Scale values in data set between 0 and 1
-        vmin = min(data["data"])
-        vmax = max(data["data"])
-        colors = [(v - vmin + 1) / (vmax - vmin + 1) for v in data["data"]]
+        # Create a list with 'DISPL_MAX_COL' num values. We add 0 (zero) to the 
+        # beginning of the list if whole set has less than 'DISPL_MAX_COL' num 
+        # values. This allows us to simulate 'scrolling' right to left. 
+        subSet = data["data"][-DISPL_MAX_COL:]      # Grab last 'n' values that can fit LED
+        lenSet = min(DISPL_MAX_COL, len(subSet))    # Do we have enough data?
+
+        # Extend 'value' list as needed
+        values = subSet if lenSet == DISPL_MAX_COL else [0 for _ in range(DISPL_MAX_COL - lenSet)] + subSet
+
+        # Scale incoming values in the data set to be between 0 and 1
+        vmin = min(values)
+        vmax = max(values)
+        colors = [(v - vmin + 1) / (vmax - vmin + 1) for v in values]
 
         # Reserve space for progress bar?
-        yMin = 2 if (self.displProgress) else 0
-        self._draw.rectangle((0, yMin, self._LED.width, self._LED.height), RGB_BLACK)
-        
-        for i in range(len(colors)):
-            # Convert the values to colors from red to blue
-            color = (1.0 - colors[i]) * 0.6
-            r, g, b = [int(x * 255.0)
-                    for x in colorsys.hsv_to_rgb(color, 1.0, 1.0)]
-        
-            # Draw a 1-pixel wide rectangle of given color
-            self._draw.rectangle((i, self.displTopBar, i + 1, self._LED.height), (r, g, b))
-        
-            # Draw and overlay a line graph in black
-            line_y = self._LED.height - (self.displTopBar + (colors[i] * (self._LED.height - self.displTopBar))) + self.displTopBar
-            self._draw.rectangle((i, line_y, i + 1, line_y + 1), RGB_BLACK)
-        
-        # Write the text at the top in black
-        message = "{}: {:.1f} {}".format(data["label"][:4], data["data"][-1], data["unit"])
-        self._draw.text((0, 0), message, font=self._fontMD, fill=COLOR_TXT)
+        yMax = DISPL_MAX_ROW - 1 if (self.displProgress) else DISPL_MAX_ROW
 
-        self._LED.display(self._img)
+        pixels = [_get_rgb(colors[col], row, yMax) for row in range(yMax) for col in range(DISPL_MAX_COL)]
+
+        self._SENSE.set_pixels(pixels)
+
+    def display_as_text(self, *args):
+        """Display data points as text in columns
+        
+        NOTE: for compatibility only
+
+        Args:
+            args: placeholder for compatibility
+        """
+        pass
 
     def display_message(self, msg):
         """Display text message
         
-        This method will redraw the entire LCD
+        This method will redraw the entire LED
 
         Args:
             msg: 'str' with text to display
@@ -388,17 +420,18 @@ class SenseHat:
         if self.displSleepMode:
             return
 
-        # Reserve space for progress bar?
-        yMin = 2 if (self.displProgress) else 0
-        self._draw.rectangle((0, yMin, self._LCD.width, self._LCD.height), RGB_BLACK)
+        # # Reserve space for progress bar?
+        # yMin = 2 if (self.displProgress) else 0
+        # self._draw.rectangle((0, yMin, self._LED.width, self._LED.height), RGB_BLACK)
 
-        # Draw message
-        x = DEF_LCD_OFFSET_X
-        y = DEF_LCD_OFFSET_Y + int((self._LCD.height - FONT_SIZE_LG) / 2)
-        self._draw.text((x, y), str(msg), font=self._fontLG, fill=COLOR_TXT)
+        # # Draw message
+        # x = DEF_LED_OFFSET_X
+        # y = DEF_LED_OFFSET_Y + int((self._LED.height - FONT_SIZE_LG) / 2)
+        # self._draw.text((x, y), str(msg), font=self._fontLG, fill=COLOR_TXT)
 
-        # Display results
-        self._LCD.display(self._img)
+        # # Display results
+        # self._LED.display(self._img)
+        pass
 
     def display_progress(self, inFrctn=0.0):
         """Update progressbar on LED
@@ -415,12 +448,10 @@ class SenseHat:
 
         # Calculate X value. We ensure that we do not go over max width
         # of LED by limiting any input value to a range of 0.0 - 1.0
-        x = int(max(min(float(inFrctn), 1.0), 0.0) * self._LED.width)
+        col = int(max(min(float(inFrctn), 1.0), 0.0) * DISPL_MAX_COL)
 
-        self._draw.rectangle((0, 0, self._LED.width, 0), COLOR_BG)
-        self._draw.rectangle((0, 0, x, 0), COLOR_PBAR)
-
-        self._LED.display(self._img)
+        for x in range(col):
+            self._SENSE.set_pixel(x, DISPL_MAX_ROW - 1, COLOR_PBAR)
 
     def display_sparkle(self):
         """Show random sparkles on LED"""
@@ -429,19 +460,18 @@ class SenseHat:
             return
 
         # Reserve space for progress bar?
-        yMin = 2 if (self.displProgress) else 0
+        yMax = DISPL_MAX_ROW - 1 if (self.displProgress) else DISPL_MAX_ROW
 
         # Create sparkles
-        x = randint(0, self._LCD.width - 1)
-        y = randint(yMin, self._LCD.height - 1)
+        x = randint(0, DISPL_MAX_COL - 1)
+        y = randint(0, yMax - 1)
         r = randint(0, 255)
         g = randint(0, 255)
         b = randint(0, 255)
 
         # Do we want to clear the screen? Or add more sparkles?
-        maxSparkle = int(self._LCD.width * self._LCD.height * MAX_SPARKLE_PCNT)
+        maxSparkle = int(DISPL_MAX_COL * yMax * MAX_SPARKLE_PCNT)
         if randint(0, maxSparkle):
-            self._draw.point((x, y), (r, g, b))
-            self._LCD.display(self._img)
+            self._SENSE.set_pixel(x, y, r, g, b)
         else:    
-            self._draw.rectangle((0, yMin, self._LCD.width, self._LCD.height), RGB_BLACK)
+            self._SENSE.clear()
