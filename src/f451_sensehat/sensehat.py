@@ -274,16 +274,6 @@ class SenseHat:
             else:
                 raise
         
-    def get_proximity(self):
-        """Get proximity from LTR559 sensor"""
-        # return self._LTR559.get_proximity()
-        pass
-    
-    def get_lux(self):
-        """Get illumination from LTR559 sensor"""
-        # return self._LTR559.get_lux()
-        pass
-
     def get_pressure(self):
         """Get air pressure data from Sense HAT sensor"""
         return self._SENSE.get_pressure()
