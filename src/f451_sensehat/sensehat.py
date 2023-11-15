@@ -28,15 +28,18 @@ except ImportError:
 __all__ = [
     "SenseHat",
     "SenseHatError",
+    "BTN_RELEASE",
     "KWD_ROTATION",
     "KWD_DISPLAY",
     "KWD_PROGRESS",
     "KWD_SLEEP",
-    "BTN_UP",
-    "BTN_DWN",
-    "BTN_LFT",
-    "BTN_RHT",
-    "BTN_MDL",
+    "KWD_DISPLAY_MIN",
+    "KWD_DISPLAY_MAX",
+    "KWD_BTN_UP",
+    "KWD_BTN_DWN",
+    "KWD_BTN_LFT",
+    "KWD_BTN_RHT",
+    "KWD_BTN_MDL",
 ]
 
 
@@ -89,14 +92,10 @@ COLOR_BG = RGB_BLACK    # Default background
 COLOR_TXT = RGB_CHROME  # Default text on background
 COLOR_PBAR = RGB_CYAN   # Default progress bar 
 
-ROTATE_90 = 90          # Rotate 90 degrees    
+ROTATE_90 = 90          # Rotate 90 degrees
+STEP_1 = 1              # Display mode step
 
-BTN_UP = 0
-BTN_DWN = 0
-BTN_LFT = 0
-BTN_RHT = 0
-BTN_MDL = 0
-
+BTN_RELEASE = ACTION_RELEASED
 
 # =========================================================
 #    K E Y W O R D S   F O R   C O N F I G   F I L E S
@@ -105,6 +104,14 @@ KWD_ROTATION = "ROTATION"
 KWD_DISPLAY = "DISPLAY"
 KWD_PROGRESS = "PROGRESS"
 KWD_SLEEP = "SLEEP"
+KWD_DISPLAY_MIN = "DISPLAYMIN"
+KWD_DISPLAY_MAX = "DISPLAYMAX"
+
+KWD_BTN_UP = "BTNUP"
+KWD_BTN_DWN = "BTNDWN"
+KWD_BTN_LFT = "BTNLFT"
+KWD_BTN_RHT = "BTNRHT"
+KWD_BTN_MDL = "BTNMDL"
 
 
 # =========================================================
@@ -185,6 +192,9 @@ class SenseHat:
         self.displMode = settings.get(KWD_DISPLAY, DEF_DISPL_MODE)
         self.displProgress = bool(settings.get(KWD_PROGRESS, STATUS_ON))
 
+        self.displModeMin = settings.get(KWD_DISPLAY_MIN, 0)
+        self.displModeMax = settings.get(KWD_DISPLAY_MAX, 0)
+
         self.displSleepTime = settings.get(KWD_SLEEP, DEF_SLEEP)
         self.displSleepMode = False
         
@@ -212,38 +222,22 @@ class SenseHat:
         sense.clear()                                               # Clear 8x8 LED
         sense.set_rotation(kwargs.get(KWD_ROTATION, DEF_ROTATION))  # Set initial rotation
 
-        sense.stick.direction_up = self._pushed_up
-        sense.stick.direction_down = self._pushed_down
-        sense.stick.direction_left = self._pushed_left
-        sense.stick.direction_right = self._pushed_right
-        sense.stick.direction_middle = self._pushed_middle
+        sense.stick.direction_up = kwargs.get(KWD_BTN_UP, self._btn_dummy)
+        sense.stick.direction_down = kwargs.get(KWD_BTN_UP, self._btn_dummy)
+        sense.stick.direction_left = kwargs.get(KWD_BTN_UP, self._btn_dummy)
+        sense.stick.direction_right = kwargs.get(KWD_BTN_UP, self._btn_dummy)
+        sense.stick.direction_middle = kwargs.get(KWD_BTN_UP, self._btn_dummy)
 
         return sense
 
-    def _pushed_up(self, event):
-        """SenseHat Joystick UP event"""
-        if event.action != ACTION_RELEASED:
-            return BTN_UP
-
-    def _pushed_down(self, event):
-        """SenseHat Joystick DOWN event"""
-        if event.action != ACTION_RELEASED:
-            return BTN_DWN
-
-    def _pushed_left(self, event):
-        """SenseHat Joystick LEFT event"""
-        if event.action != ACTION_RELEASED:
-            return BTN_LFT
-
-    def _pushed_right(self, event):
-        """SenseHat Joystick RIGHT event"""
-        if event.action != ACTION_RELEASED:
-            return BTN_RHT
-
-    def _pushed_middle(self, event):
-        """SenseHat Joystick MIDDLE (down) event"""
-        if event.action != ACTION_RELEASED:
-            return BTN_MDL
+    @staticmethod
+    def _btn_dummy(*args):
+        """SenseHat Joystick dummy event
+        
+        This is a placeholder event which is assigned when no other
+        action can be tied to a given Sene HAT Joystick event.
+        """
+        pass
 
     def is_fake(self):
         return getattr(self._SENSE, 'fake', False)
@@ -270,7 +264,7 @@ class SenseHat:
         
         except FileNotFoundError:
             if not strict:
-                return self._BME280.get_temperature()
+                return self._SENSE.get_temperature()
             else:
                 raise
         
@@ -286,11 +280,29 @@ class SenseHat:
         """Get temperature data from Sense HAT sensor"""
         return self._SENSE.get_temperature()
 
+    def update_display_mode(self, direction):
+        """Change LED display mode
+
+        We're changing the LED display mode and we're also 
+        waking up the display if needed.
+
+        Args:
+            direction: pos/neg integer
+        """
+        if int(direction) < 0:
+            self.displMode = self.displModeMax if self.displMode <= self.displModeMin else self.displMode - STEP_1
+        else:
+            self.displMode = self.displModeMin if self.displMode >= self.displModeMax else self.displMode + STEP_1
+
+        # Wake up display?
+        if not self.displSleepMode:
+            self.display_on()
+
     def update_sleep_mode(self, *args):
         """Enable or disable LED sleep mode
 
-        We're turning on/off teh LED sleep mode flag based on whether
-        one or more args are 'True'
+        We're turning on/off the LED sleep mode flag based 
+        on whether one or more args are 'True'
 
         Args:
             args: list of one or more flags
@@ -305,9 +317,55 @@ class SenseHat:
         elif not sleep and self.displSleepMode:
             self.display_on()
 
-    def display_init(self):
-        """Initialize LED drawing area"""
+    def joystick_init(self, **kwargs):
+        """Initialize Sense HAT joystick
+
+        We can set/update the actions that are tied to
+        Sense HAT joystick events.
+
+        Args:
+            kwargs: optional values for joystick actions
+        """
+        self._SENSE.stick.direction_up = kwargs.get(KWD_BTN_UP, self._SENSE.stick.direction_up)
+        self._SENSE.stick.direction_down = kwargs.get(KWD_BTN_UP, self._SENSE.stick.direction_down)
+        self._SENSE.stick.direction_left = kwargs.get(KWD_BTN_UP, self._SENSE.stick.direction_left)
+        self._SENSE.stick.direction_right = kwargs.get(KWD_BTN_UP, self._SENSE.stick.direction_right)
+        self._SENSE.stick.direction_middle = kwargs.get(KWD_BTN_UP, self._SENSE.stick.direction_middle)
+
+    def display_init(self, **kwargs):
+        """Initialize LED display
+
+        We can set/update the number of possible displays by
+        using the 'kwargs' to displayMode min/max values.
+
+        Args:
+            kwargs: optional values for displayMode min/max values
+        """
+        self.displModeMin = kwargs.get(KWD_DISPLAY_MIN, self.displModeMin)
+        self.displModeMax = kwargs.get(KWD_DISPLAY_MAX, self.displModeMax)
+
         self.display_on()
+
+    def display_rotate(self, direction):
+        """Rotate LED display
+
+        Since LED is square (8x8), rotate it 90 degrees at a time
+        without affecting aspect ratio, etc.
+
+        Args:
+            direction: pos/neg integer
+        """
+        if int(direction) < 0:
+            self.displRotation = 270 if self.displRotation <= 0 else self.displRotation - ROTATE_90 
+        else:
+            self.displRotation = 0 if self.displRotation >= 270 else self.displRotation + ROTATE_90 
+
+        # Rotate as needed
+        self._SENSE.set_rotation(self.displRotation)
+
+        # Wake up display?
+        if not self.displSleepMode:
+            self.display_on()
 
     def display_on(self):
         """Turn 'on' LED display"""
