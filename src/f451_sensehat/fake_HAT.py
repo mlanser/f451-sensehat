@@ -14,12 +14,13 @@ import random
 ACTION_PRESSED = False
 ACTION_HELD = False
 ACTION_RELEASED = False
-TEMP_MIN = 0        # Unit: C
-TEMP_MAX = 65    
-PRESS_MIN = 260     # Unit: hPa
-PRESS_MAX = 1260
-HUMID_MIN = 20      # Unit: %
-HUMID_MAX = 80
+
+TEMP_MIN = 0.0          # Min/max sense degrees in C
+TEMP_MAX = 65.0
+PRESS_MIN = 260.0       # Min/max sense pressure in hPa
+PRESS_MAX = 1260.0
+HUMID_MIN = 0.0         # Min/max sense humidity in %
+HUMID_MAX = 100.0
 
 LED_WIDTH = 8
 LED_HEIGHT = 8
