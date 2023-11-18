@@ -36,7 +36,9 @@ $ pip install 'f451-sensehat @ git+ssh://git@github.com:mlanser/f451-sensehat.gi
 
 ## How to use
 
-Using the module is straightforward. Simply `import` it into your code and instantiate an `SenseHat` object which you can then use throughout your code.
+### SenseHat Device
+
+The `SenseHat` object makes it easy to interact with the *Sense HAT* device. The methods of this object help read sensor data, display data to the 8x8 LED, etc., and using the module is straightforward. Simply `import` it into your code and instantiate an `SenseHat` object which you can then use throughout your code.
 
 ```Python
 # Import f451 Labs SenseHat
@@ -54,4 +56,24 @@ mySense = SenseHat({
 print(f"TEMP:     {round(mySense.get_temperature(), 1)} C")
 print(f"PRESSURE: {round(mySense.get_pressure(), 1)} hPa")
 print(f"HUMIDITY: {round(mySense.get_humidity(), 1)} %")
+```
+
+### SenseHat Data
+
+The *f451 Labs SenseHat* module also includes a `SenseData` object and a few other helper objects. These objects are designed to simplify storing and managing sensor data. The `SenseData` object implements so-called [double-ended queues ('deque')](https://docs.python.org/3/library/collections.html#deque-objects) which makes it easy to add and retrieve data. To use these objects in your code, simply `import` them into your code and instantiate an `SenseData` object.
+
+```Python
+# Import f451 Labs SenseHat Data
+from f451_sensehat.sensehat_data import SenseData
+
+maxLen = 10     # Max length of queue
+defVal = 1      # Default value for initialization
+
+myData = SenseData(defVal, maxlen)
+
+# Assuming we have instatntiated the SenseHat object as 'mySense' we
+# can then read and store sensor data right into the data queues
+myData.temperature.data.append(mySense.get_temperature())
+myData.pressure.data.append(mySense.get_pressure())
+myData.humidity.data.append(mySense.get_humidity())
 ```
