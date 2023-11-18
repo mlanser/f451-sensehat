@@ -77,3 +77,19 @@ myData.temperature.data.append(mySense.get_temperature())
 myData.pressure.data.append(mySense.get_pressure())
 myData.humidity.data.append(mySense.get_humidity())
 ```
+
+## How to test
+
+The tests are written for [pytest](https://docs.pytest.org/en/7.1.x/contents.html) and we use markers to separate out tests that require the actual Sense HAT hardware. Some tests do not rely on the hardware to be prexent. However, those tests rely on the `pytest-mock` module to be present.
+
+```bash
+
+# Run all tests (except marked 'skip')
+$ pytest
+
+# Run tests with 'hardware' marker
+$ pytest -m "hardware"
+
+# Run tests without 'hardware' marker
+$ pytest -m "not hardware"
+```
