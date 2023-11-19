@@ -71,7 +71,7 @@ defVal = 1      # Default value for initialization
 
 myData = SenseData(defVal, maxlen)
 
-# Assuming we have instatntiated the SenseHat object as 'mySense' we
+# Assuming we have instantiated the SenseHat object as 'mySense' we
 # can then read and store sensor data right into the data queues
 myData.temperature.data.append(mySense.get_temperature())
 myData.pressure.data.append(mySense.get_pressure())

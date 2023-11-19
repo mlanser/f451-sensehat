@@ -5,7 +5,7 @@ to manage all sensor data from the Sendse HAT device. There
 are also methods to support conversion between units, etc.
 
 Dependencies:
-    TBD
+    - deque - double-ended queue from 'collections' library
 """
 
 from collections import deque
