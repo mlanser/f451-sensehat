@@ -23,23 +23,23 @@ from subprocess import PIPE, Popen
 try:
     from sense_hat import SenseHat as RPISenseHat, ACTION_PRESSED, ACTION_HELD, ACTION_RELEASED
 except ImportError:
-    from .fake_HAT import FakeSenseHat as RPISenseHat, ACTION_PRESSED, ACTION_HELD, ACTION_RELEASED
+    from .fake_HAT import FakeSenseHat as RPISenseHat, ACTION_PRESSED, ACTION_HELD, ACTION_RELEASED  # noqa: F401
 
 __all__ = [
-    "SenseHat",
-    "SenseHatError",
-    "BTN_RELEASE",
-    "KWD_ROTATION",
-    "KWD_DISPLAY",
-    "KWD_PROGRESS",
-    "KWD_SLEEP",
-    "KWD_DISPLAY_MIN",
-    "KWD_DISPLAY_MAX",
-    "KWD_BTN_UP",
-    "KWD_BTN_DWN",
-    "KWD_BTN_LFT",
-    "KWD_BTN_RHT",
-    "KWD_BTN_MDL",
+    'SenseHat',
+    'SenseHatError',
+    'BTN_RELEASE',
+    'KWD_ROTATION',
+    'KWD_DISPLAY',
+    'KWD_PROGRESS',
+    'KWD_SLEEP',
+    'KWD_DISPLAY_MIN',
+    'KWD_DISPLAY_MAX',
+    'KWD_BTN_UP',
+    'KWD_BTN_DWN',
+    'KWD_BTN_LFT',
+    'KWD_BTN_RHT',
+    'KWD_BTN_MDL',
 ]
 
 
@@ -50,7 +50,7 @@ DEF_ROTATION = 0        # Default display rotation
 DEF_DISPL_MODE = 0      # Default display mode
 DEF_SLEEP = 600         # Default time to sleep (in seconds)
 DEF_LED_OFFSET_X = 0    # Default horizontal offset for LED
-DEF_LED_OFFSET_Y = 0    # Default vertical offseet for LED 
+DEF_LED_OFFSET_Y = 0    # Default vertical offseet for LED
 
 STATUS_ON = True
 STATUS_OFF = False
@@ -81,37 +81,37 @@ RGB_PURPLE = (127, 0, 255)
 
 # RGB colors and palette for values on combo/text screen
 COLOR_PALETTE = [
-    RGB_BLUE,           # Dangerously Low
-    RGB_CYAN,           # Low
-    RGB_GREEN,          # Normal
-    RGB_YELLOW,         # High
-    RGB_RED             # Dangerously High
-]         
+    RGB_BLUE,       # Dangerously Low
+    RGB_CYAN,       # Low
+    RGB_GREEN,      # Normal
+    RGB_YELLOW,     # High
+    RGB_RED,        # Dangerously High
+]
 
 COLOR_BG = RGB_BLACK    # Default background
 COLOR_TXT = RGB_CHROME  # Default text on background
-COLOR_PBAR = RGB_CYAN   # Default progress bar 
+COLOR_PBAR = RGB_CYAN   # Default progress bar
 
-ROTATE_90 = 90          # Rotate 90 degrees
-STEP_1 = 1              # Display mode step
+ROTATE_90 = 90      # Rotate 90 degrees
+STEP_1 = 1          # Display mode step
 
 BTN_RELEASE = ACTION_RELEASED
 
 # =========================================================
 #    K E Y W O R D S   F O R   C O N F I G   F I L E S
 # =========================================================
-KWD_ROTATION = "ROTATION"
-KWD_DISPLAY = "DISPLAY"
-KWD_PROGRESS = "PROGRESS"
-KWD_SLEEP = "SLEEP"
-KWD_DISPLAY_MIN = "DISPLAYMIN"
-KWD_DISPLAY_MAX = "DISPLAYMAX"
+KWD_ROTATION = 'ROTATION'
+KWD_DISPLAY = 'DISPLAY'
+KWD_PROGRESS = 'PROGRESS'
+KWD_SLEEP = 'SLEEP'
+KWD_DISPLAY_MIN = 'DISPLAYMIN'
+KWD_DISPLAY_MAX = 'DISPLAYMAX'
 
-KWD_BTN_UP = "BTNUP"
-KWD_BTN_DWN = "BTNDWN"
-KWD_BTN_LFT = "BTNLFT"
-KWD_BTN_RHT = "BTNRHT"
-KWD_BTN_MDL = "BTNMDL"
+KWD_BTN_UP = 'BTNUP'
+KWD_BTN_DWN = 'BTNDWN'
+KWD_BTN_LFT = 'BTNLFT'
+KWD_BTN_RHT = 'BTNRHT'
+KWD_BTN_MDL = 'BTNMDL'
 
 
 # =========================================================
@@ -119,6 +119,7 @@ KWD_BTN_MDL = "BTNMDL"
 # =========================================================
 class SenseHatError(Exception):
     """Custom exception class"""
+
     pass
 
 
@@ -128,26 +129,26 @@ class SenseHatError(Exception):
 class SenseHat:
     """Main SenseHat for managing the Raspberry Pi Sense HAT.
 
-    This class encapsulates all methods required to interact with the 
+    This class encapsulates all methods required to interact with the
     sensors and the LED on the Raspberry Pi Sense HAT.
 
-    NOTE: some methods are not needed, but are kept to maintain a basic 
-    level of compatibility with f451 Labs modules for other HATs and/or 
+    NOTE: some methods are not needed, but are kept to maintain a basic
+    level of compatibility with f451 Labs modules for other HATs and/or
     displays (e.g. f451-enviro, etc.).
 
-    NOTE: attributes follow same naming convention as used in the 
-    'settings.toml' file. This makes it possible to pass in the 'config' 
+    NOTE: attributes follow same naming convention as used in the
+    'settings.toml' file. This makes it possible to pass in the 'config'
     object (or any other dict) as is.
 
-    NOTE: we let users provide an entire 'dict' object with settings as 
+    NOTE: we let users provide an entire 'dict' object with settings as
     key-value pairs, or as individual settings. User can combine both and,
     for example, provide a standard 'config' object as well as individual
     settings which could override the values in the 'config' object.
 
     Example:
-        mySenseHat = SenseHat(config)           # Use values from 'config' 
+        mySenseHat = SenseHat(config)           # Use values from 'config'
         mySenseHat = SenseHat(key=val)          # Use val
-        mySenseHat = SenseHat(config, key=val)  # Use values from 'config' and also use 'val' 
+        mySenseHat = SenseHat(config, key=val)  # Use values from 'config' and also use 'val'
 
     Attributes:
         ROTATION:   Default rotation for LED display - [0, 90, 180, 270]
@@ -172,6 +173,7 @@ class SenseHat:
         display_message:    Display text message
         display_progress:   Display progress bar
     """
+
     def __init__(self, *args, **kwargs):
         """Initialize Sense HAT hardware
 
@@ -181,8 +183,8 @@ class SenseHat:
             kwargs:
                 User can provide individual settings as key-value pairs
         """
-        # We combine 'args' and 'kwargs' to allow users to provide the entire 
-        # 'config' object and/or individual settings (which could override 
+        # We combine 'args' and 'kwargs' to allow users to provide the entire
+        # 'config' object and/or individual settings (which could override
         # values in 'config').
         settings = {**args[0], **kwargs} if args and isinstance(args[0], dict) else kwargs
 
@@ -197,14 +199,14 @@ class SenseHat:
 
         self.displSleepTime = settings.get(KWD_SLEEP, DEF_SLEEP)
         self.displSleepMode = False
-        
+
         self.displTopX = DISPL_TOP_X
         self.displTopY = DISPL_TOP_Y
 
     @property
     def widthLED(self):
         return DISPL_MAX_COL
-    
+
     @property
     def heightLED(self):
         return DISPL_MAX_ROW
@@ -212,14 +214,14 @@ class SenseHat:
     def _init_SENSE(self, **kwargs):
         """Initialize SenseHat
 
-        Initialize the SenseHat device, set some 
+        Initialize the SenseHat device, set some
         default parameters, and clear LED.
         """
         sense = RPISenseHat()
-        
-        sense.set_imu_config(False, False, False)                   # Disable IMU functions
+
+        sense.set_imu_config(False, False, False)  # Disable IMU functions
         sense.low_light = True
-        sense.clear()                                               # Clear 8x8 LED
+        sense.clear()  # Clear 8x8 LED
         sense.set_rotation(kwargs.get(KWD_ROTATION, DEF_ROTATION))  # Set initial rotation
 
         sense.stick.direction_up = kwargs.get(KWD_BTN_UP, self._btn_dummy)
@@ -233,7 +235,7 @@ class SenseHat:
     @staticmethod
     def _btn_dummy(*args):
         """SenseHat Joystick dummy event
-        
+
         This is a placeholder event which is assigned when no other
         action can be tied to a given Sene HAT Joystick event.
         """
@@ -251,8 +253,8 @@ class SenseHat:
 
         Args:
             strict:
-                If 'True', then we raise an exception, else we simply 
-                return 'regular' temperature (from BME280) if the 
+                If 'True', then we raise an exception, else we simply
+                return 'regular' temperature (from BME280) if the
                 exceptions is 'FileNotFoundError'
         Raises:
             Same exceptions as 'Popen'
@@ -260,14 +262,14 @@ class SenseHat:
         try:
             process = Popen(['vcgencmd', 'measure_temp'], stdout=PIPE, universal_newlines=True)
             output, _error = process.communicate()
-            return float(output[output.index('=') + 1:output.rindex("'")])
-        
+            return float(output[output.index('=') + 1 : output.rindex("'")])
+
         except FileNotFoundError:
             if not strict:
                 return self._SENSE.get_temperature()
             else:
                 raise
-        
+
     def get_pressure(self):
         """Get air pressure data from Sense HAT sensor"""
         return self._SENSE.get_pressure()
@@ -283,16 +285,24 @@ class SenseHat:
     def update_display_mode(self, direction):
         """Change LED display mode
 
-        We're changing the LED display mode and we're also 
+        We're changing the LED display mode and we're also
         waking up the display if needed.
 
         Args:
             direction: pos/neg integer
         """
         if int(direction) < 0:
-            self.displMode = self.displModeMax if self.displMode <= self.displModeMin else self.displMode - STEP_1
+            self.displMode = (
+                self.displModeMax
+                if self.displMode <= self.displModeMin
+                else self.displMode - STEP_1
+            )
         else:
-            self.displMode = self.displModeMin if self.displMode >= self.displModeMax else self.displMode + STEP_1
+            self.displMode = (
+                self.displModeMin
+                if self.displMode >= self.displModeMax
+                else self.displMode + STEP_1
+            )
 
         # Wake up display?
         if not self.displSleepMode:
@@ -301,7 +311,7 @@ class SenseHat:
     def update_sleep_mode(self, *args):
         """Enable or disable LED sleep mode
 
-        We're turning on/off the LED sleep mode flag based 
+        We're turning on/off the LED sleep mode flag based
         on whether one or more args are 'True'
 
         Args:
@@ -326,11 +336,21 @@ class SenseHat:
         Args:
             kwargs: optional values for joystick actions
         """
-        self._SENSE.stick.direction_up = kwargs.get(KWD_BTN_UP, self._SENSE.stick.direction_up)
-        self._SENSE.stick.direction_down = kwargs.get(KWD_BTN_UP, self._SENSE.stick.direction_down)
-        self._SENSE.stick.direction_left = kwargs.get(KWD_BTN_UP, self._SENSE.stick.direction_left)
-        self._SENSE.stick.direction_right = kwargs.get(KWD_BTN_UP, self._SENSE.stick.direction_right)
-        self._SENSE.stick.direction_middle = kwargs.get(KWD_BTN_UP, self._SENSE.stick.direction_middle)
+        self._SENSE.stick.direction_up = kwargs.get(
+            KWD_BTN_UP, self._SENSE.stick.direction_up
+        )
+        self._SENSE.stick.direction_down = kwargs.get(
+            KWD_BTN_UP, self._SENSE.stick.direction_down
+        )
+        self._SENSE.stick.direction_left = kwargs.get(
+            KWD_BTN_UP, self._SENSE.stick.direction_left
+        )
+        self._SENSE.stick.direction_right = kwargs.get(
+            KWD_BTN_UP, self._SENSE.stick.direction_right
+        )
+        self._SENSE.stick.direction_middle = kwargs.get(
+            KWD_BTN_UP, self._SENSE.stick.direction_middle
+        )
 
     def display_init(self, **kwargs):
         """Initialize LED display
@@ -356,9 +376,9 @@ class SenseHat:
             direction: pos/neg integer
         """
         if int(direction) < 0:
-            self.displRotation = 270 if self.displRotation <= 0 else self.displRotation - ROTATE_90 
+            self.displRotation = 270 if self.displRotation <= 0 else self.displRotation - ROTATE_90
         else:
-            self.displRotation = 0 if self.displRotation >= 270 else self.displRotation + ROTATE_90 
+            self.displRotation = 0 if self.displRotation >= 270 else self.displRotation + ROTATE_90
 
         # Rotate as needed
         self._SENSE.set_rotation(self.displRotation)
@@ -370,36 +390,36 @@ class SenseHat:
     def display_on(self):
         """Turn 'on' LED display"""
         self._SENSE.low_light = True
-        self.displSleepMode = False     # Reset 'sleep mode' flag
+        self.displSleepMode = False  # Reset 'sleep mode' flag
         self.display_blank()
 
     def display_off(self):
         """Turn 'off' LED display"""
         self.display_blank()
-        self.displSleepMode = True      # Set 'sleep mode' flag
-        
+        self.displSleepMode = True  # Set 'sleep mode' flag
+
     def display_blank(self):
         """Show clear/blank LED"""
         # Skip this if we're in 'sleep' mode
         if self.displSleepMode:
             return
-        
-        self._SENSE.clear()             # Clear 8x8 LED
+
+        self._SENSE.clear()  # Clear 8x8 LED
 
     def display_reset(self):
         """Reset and clear LED"""
         self._SENSE.low_light = False
-        self._SENSE.clear()             # Clear 8x8 LED
+        self._SENSE.clear()  # Clear 8x8 LED
 
     def display_as_graph(self, data):
         """Display graph and data point as text label
-        
+
         This method will redraw the entire 8x8 LED all at once. That means
-        we need to create a list of 64 RGB tuples, and then send the list 
+        we need to create a list of 64 RGB tuples, and then send the list
         to the Sense HAT 'set_pixels()' method.
 
-        NOTE: the data structure is more complex than we need for Sense HAT 
-        devices. But we want to maintain a basic level of compatibility with 
+        NOTE: the data structure is more complex than we need for Sense HAT
+        devices. But we want to maintain a basic level of compatibility with
         other f451 Labs modules.
 
         Args:
@@ -410,13 +430,14 @@ class SenseHat:
                         "unit" <unit string>,
                         "label": <label string>,
                         "limit": [list of limits]
-                    }    
+                    }
         """
+
         def _get_rgb(val, curRow, maxRow):
             # Should the pixel on this row be black?
             if curRow < (maxRow - int(val * maxRow)):
                 return RGB_BLACK
-            
+
             # Convert the values to colors from red to blue
             color = (1.0 - val) * 0.6
             return tuple([int(x * 255.0) for x in colorsys.hsv_to_rgb(color, 1.0, 1.0)])
@@ -425,14 +446,18 @@ class SenseHat:
         if self.displSleepMode:
             return
 
-        # Create a list with 'DISPL_MAX_COL' num values. We add 0 (zero) to the 
-        # beginning of the list if whole set has less than 'DISPL_MAX_COL' num 
-        # values. This allows us to simulate 'scrolling' right to left. 
-        subSet = data["data"][-DISPL_MAX_COL:]      # Grab last 'n' values that can fit LED
-        lenSet = min(DISPL_MAX_COL, len(subSet))    # Do we have enough data?
+        # Create a list with 'DISPL_MAX_COL' num values. We add 0 (zero) to the
+        # beginning of the list if whole set has less than 'DISPL_MAX_COL' num
+        # values. This allows us to simulate 'scrolling' right to left.
+        subSet = data['data'][-DISPL_MAX_COL:]  # Grab last 'n' values that can fit LED
+        lenSet = min(DISPL_MAX_COL, len(subSet))  # Do we have enough data?
 
         # Extend 'value' list as needed
-        values = subSet if lenSet == DISPL_MAX_COL else [0 for _ in range(DISPL_MAX_COL - lenSet)] + subSet
+        values = (
+            subSet
+            if lenSet == DISPL_MAX_COL
+            else [0 for _ in range(DISPL_MAX_COL - lenSet)] + subSet
+        )
 
         # Scale incoming values in the data set to be between 0 and 1
         vmin = min(values)
@@ -442,13 +467,15 @@ class SenseHat:
         # Reserve space for progress bar?
         yMax = DISPL_MAX_ROW - 1 if (self.displProgress) else DISPL_MAX_ROW
 
-        pixels = [_get_rgb(colors[col], row, yMax) for row in range(yMax) for col in range(DISPL_MAX_COL)]
+        pixels = [
+            _get_rgb(colors[col], row, yMax) for row in range(yMax) for col in range(DISPL_MAX_COL)
+        ]
 
         self._SENSE.set_pixels(pixels)
 
     def display_as_text(self, *args):
         """Display data points as text in columns
-        
+
         NOTE: for compatibility only
 
         Args:
@@ -458,7 +485,7 @@ class SenseHat:
 
     def display_message(self, msg):
         """Display text message
-        
+
         This method will redraw the entire LED
 
         Args:
@@ -484,7 +511,7 @@ class SenseHat:
     def display_progress(self, inFrctn=0.0):
         """Update progressbar on LED
 
-        This method marks 'fraction complete' (0.0 - 1.0) 
+        This method marks 'fraction complete' (0.0 - 1.0)
         on 1px tall progress bar on top row of LED
 
         Args:
@@ -521,5 +548,5 @@ class SenseHat:
         maxSparkle = int(DISPL_MAX_COL * yMax * MAX_SPARKLE_PCNT)
         if randint(0, maxSparkle):
             self._SENSE.set_pixel(x, y, r, g, b)
-        else:    
+        else:
             self._SENSE.clear()

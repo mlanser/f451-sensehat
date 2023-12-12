@@ -61,10 +61,10 @@ class FakeSenseHat:
         pass
 
     def get_temperature(self):
-        return random.randint(TEMP_MIN * 10, TEMP_MAX * 10) / 10
+        return random.randint(int(TEMP_MIN * 10), int(TEMP_MAX * 10)) / 10
     
     def get_pressure(self):
-        return random.randint(PRESS_MIN * 10, PRESS_MAX * 10) / 10
+        return random.randint(int(PRESS_MIN * 10), int(PRESS_MAX * 10)) / 10
     
     def get_humidity(self):
-        return random.randint(HUMID_MIN * 10, HUMID_MAX * 10) / 10
+        return random.randint(int(HUMID_MIN * 10), int(HUMID_MAX * 10)) / 10

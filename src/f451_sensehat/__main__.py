@@ -10,12 +10,7 @@ from f451_sensehat.sensehat import SenseHat
 def main():
     # Initialize device instance which includes all sensors
     # and LED display on Sense HAT
-    sense = SenseHat({
-        "ROTATION": 0,
-        "DISPLAY": 0,
-        "PROGRESS": 0,
-        "SLEEP": 600    
-    })
+    sense = SenseHat({'ROTATION': 0, 'DISPLAY': 0, 'PROGRESS': 0, 'SLEEP': 600})
 
     # Skip display demos if we're using fake HAT
     if not sense.is_fake():
@@ -47,5 +42,5 @@ def main():
     print("=============== [End of Demo] =================\n")
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

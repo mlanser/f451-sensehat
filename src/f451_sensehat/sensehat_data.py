@@ -11,25 +11,25 @@ Dependencies:
 from collections import deque
 
 __all__ = [
-    "SenseData",
-    "SenseObject",
-    "TemperatureObject",
-    "COLOR_MAP",
-    "TEMP_UNIT_C",
-    "TEMP_UNIT_F",
-    "TEMP_UNIT_K",
-    "COLOR_LOW",
-    "COLOR_NORM",
-    "COLOR_HIGH",
+    'SenseData',
+    'SenseObject',
+    'TemperatureObject',
+    'COLOR_MAP',
+    'TEMP_UNIT_C',
+    'TEMP_UNIT_F',
+    'TEMP_UNIT_K',
+    'COLOR_LOW',
+    'COLOR_NORM',
+    'COLOR_HIGH',
 ]
 
 
 # =========================================================
 #              M I S C .   C O N S T A N T S
 # =========================================================
-TEMP_UNIT_C = "C"   # Celsius
-TEMP_UNIT_F = "F"   # Fahrenheit
-TEMP_UNIT_K = "K"   # Kelvin
+TEMP_UNIT_C = 'C'  # Celsius
+TEMP_UNIT_F = 'F'  # Fahrenheit
+TEMP_UNIT_K = 'K'  # Kelvin
 
 # Limit set [A, B, C, D] means:
 #     A > value      -> Dangerously Low    = "bright_red"
@@ -38,11 +38,11 @@ TEMP_UNIT_K = "K"   # Kelvin
 #     C < value < D  -> High               = "cyan"
 #         value > D  -> Dangerously High   = "blue"
 COLOR_MAP = [
-    "bright_red",       # 0
-    "bright_yellow",    # 1
-    "green",            # 2
-    "cyan",             # 3
-    "blue"              # 4
+    'bright_red',       # 0
+    'bright_yellow',    # 1
+    'green',            # 2
+    'cyan',             # 3
+    'blue',             # 4
 ]
 # Shortcuts for indicating main colors
 COLOR_LOW = 0
@@ -58,7 +58,7 @@ class SenseObject:
 
     Attributes:
         data:   'dequeue' for data points
-        valid:  'tuple' with valid range (min and max) values for data points 
+        valid:  'tuple' with valid range (min and max) values for data points
         unit:   'str' for data unit of measure (e.g. "C" for temperature)
         limits: 'list' of limit values
         label:  'str' for data object label (e .g. "Temperature")
@@ -66,6 +66,7 @@ class SenseObject:
     Methods:
         as_dict: return data attributes as 'dict'
     """
+
     def __init__(self, data, valid, unit, limits, label):
         self.data = data
         self.valid = valid
@@ -76,11 +77,11 @@ class SenseObject:
     def as_dict(self):
         """Return data object as 'dict' with each attribute as key."""
         return {
-            "data": self.data,
-            "valid": self.valid,
-            "unit": self.unit,
-            "limits": self.limits,
-            "label": self.label.capitalize()
+            'data': self.data,
+            'valid': self.valid,
+            'unit': self.unit,
+            'limits': self.limits,
+            'label': self.label.capitalize(),
         }
 
 
@@ -89,9 +90,9 @@ class TemperatureObject(SenseObject):
 
     Attributes:
         data:   'dequeue' for data points
-        valid:  'tuple' with valid range (min and max) values 
-                for data points. If either value is 'None', then 
-                disregard limits 
+        valid:  'tuple' with valid range (min and max) values
+                for data points. If either value is 'None', then
+                disregard limits
         unit:   'str' for data unit of measure (e.g. "C" for temperature)
         limits: 'list' of limit values
         label:  'str' for data object label (e .g. "Temperature")
@@ -99,12 +100,13 @@ class TemperatureObject(SenseObject):
     Methods:
         as_dict: return data attributes as 'dict'
     """
+
     def __init__(self, data, valid, unit, limits, label):
         super().__init__(data, valid, unit, limits, label)
 
     def as_dict(self, unit=TEMP_UNIT_C):
         """Return object as 'dict' with temp in C, F, or K
-        
+
         Args:
             unit: if "C" then return temperature in Celsius
                   if "F"            -"-          in Fahrenheit
@@ -118,11 +120,11 @@ class TemperatureObject(SenseObject):
             data = self.data
 
         return {
-            "data": data,
-            "valid": self.valid,
-            "unit": self.unit,
-            "limits": self.limits,
-            "label": self.label.capitalize()
+            'data': data,
+            'valid': self.valid,
+            'unit': self.unit,
+            'limits': self.limits,
+            'label': self.label.capitalize(),
         }
 
     @staticmethod
@@ -138,8 +140,8 @@ class TemperatureObject(SenseObject):
 
 class SenseData:
     """Data structure for holding and managing sensor data.
-    
-    Create an empty full-size data structure that we use 
+
+    Create an empty full-size data structure that we use
     in the app to collect a series of sensor data.
 
     NOTE: The 'limits' attribute stores a list of limits. You
@@ -167,9 +169,10 @@ class SenseData:
 
     Methods:
         as_list: returns a 'list' with data from each attribute as 'dict'
-        convert_C2F: static (wrapper) method. Converts Celsius to Fahrenheit 
-        convert_C2K: static (wrapper) method. Converts Celsius to Kelvin 
+        convert_C2F: static (wrapper) method. Converts Celsius to Fahrenheit
+        convert_C2K: static (wrapper) method. Converts Celsius to Kelvin
     """
+
     def __init__(self, defVal, maxLen):
         """Initialize data structurte.
 
@@ -182,31 +185,31 @@ class SenseData:
         """
         self.temperature = TemperatureObject(
             deque([defVal] * maxLen, maxlen=maxLen),
-            (0, 65),            # Sense HAT temp sensor (STMicro LPS25HB) range 0-65°C (±2°C)
-            "C",
+            (0, 65),        # Sense HAT temp sensor (STMicro LPS25HB) range 0-65°C (±2°C)
+            'C',
             [4, 18, 25, 35],
-            "Temperature"
+            'Temperature',
         )
         self.pressure = SenseObject(
             deque([defVal] * maxLen, maxlen=maxLen),
-            (260, 1260),        # Sense HAT pressure sensor (STMicro LPS25HB) range 260-1260 hPa
-            "hPa",
+            (260, 1260),    # Sense HAT pressure sensor (STMicro LPS25HB) range 260-1260 hPa
+            'hPa',
             [250, 650, 1013.25, 1015],
-            "Pressure"
+            'Pressure',
         )
         self.humidity = SenseObject(
             deque([defVal] * maxLen, maxlen=maxLen),
-            (0, 100),           # Sense HAT humidity sensor (STMicro HTS221) range 0-100%
-            "%",
+            (0, 100),       # Sense HAT humidity sensor (STMicro HTS221) range 0-100%
+            '%',
             [20, 30, 60, 70],
-            "Humidity"
+            'Humidity',
         )
         self.light = SenseObject(
             deque([defVal] * maxLen, maxlen=maxLen),
-            (None, None),       # Sense HAT color/brightness sensor (TCS3400)
-            "Lux",
+            (None, None),   # Sense HAT color/brightness sensor (TCS3400)
+            'Lux',
             [-1, -1, 30000, 100000],
-            "Light"
+            'Light',
         )
 
     def as_list(self, tempUnit=TEMP_UNIT_C):
@@ -216,15 +219,15 @@ class SenseData:
             self.humidity.as_dict(),
             self.light.as_dict(),
         ]
-    
+
     def as_dict(self, tempUnit=TEMP_UNIT_C):
         return {
-            "temperature": self.temperature.as_dict(tempUnit),
-            "pressure": self.pressure.as_dict(),
-            "humidity": self.humidity.as_dict(),
-            "light": self.light.as_dict(),
+            'temperature': self.temperature.as_dict(tempUnit),
+            'pressure': self.pressure.as_dict(),
+            'humidity': self.humidity.as_dict(),
+            'light': self.light.as_dict(),
         }
-    
+
     def convert_C2F(self, celsius):
         return self.temperature._convert_C2F(celsius)
 
