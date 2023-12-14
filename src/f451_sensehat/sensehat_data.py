@@ -32,14 +32,16 @@ TEMP_UNIT_F = 'F'  # Fahrenheit
 TEMP_UNIT_K = 'K'  # Kelvin
 
 # Limit set [A, B, C, D] means:
-#     A > value      -> Dangerously Low    = "bright_red"
-#     A < value < B  -> Low                = "bright_yellow"
-#     B < value < C  -> Normal             = "green"
-#     C < value < D  -> High               = "cyan"
-#         value > D  -> Dangerously High   = "blue"
+#
+#             val <= A -> Dangerously Low   = "red"
+#     B >= val >  A -> Low                  = "yellow"
+#     C >= val >  B -> Normal               = "green"
+#     D >= val >  C -> High                 = "cyan"
+#             val >  D -> Dangerously High  = "blue"
+#
 COLOR_MAP = [
-    'bright_red',       # 0
-    'bright_yellow',    # 1
+    'red',              # 0
+    'yellow',           # 1
     'green',            # 2
     'cyan',             # 3
     'blue',             # 4
