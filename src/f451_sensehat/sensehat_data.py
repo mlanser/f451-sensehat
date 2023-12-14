@@ -40,8 +40,8 @@ TEMP_UNIT_K = 'K'  # Kelvin
 #             val >  D -> Dangerously High  = "blue"
 #
 COLOR_MAP = [
-    'red',              # 0
-    'yellow',           # 1
+    'red',              # 0     -- These colors must also work
+    'yellow',           # 1        with 'termcolor' library
     'green',            # 2
     'cyan',             # 3
     'blue',             # 4
