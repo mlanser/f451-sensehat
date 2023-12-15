@@ -43,6 +43,7 @@ __all__ = [
 ]
 
 
+# fmt: off
 # =========================================================
 #              M I S C .   C O N S T A N T S
 # =========================================================
@@ -81,21 +82,22 @@ RGB_PURPLE = (127, 0, 255)
 
 # RGB colors and palette for values on combo/text screen
 COLOR_PALETTE = [
-    RGB_BLUE,       # Dangerously Low
-    RGB_CYAN,       # Low
-    RGB_GREEN,      # Normal
-    RGB_YELLOW,     # High
-    RGB_RED,        # Dangerously High
+    RGB_BLUE,           # Dangerously Low
+    RGB_CYAN,           # Low
+    RGB_GREEN,          # Normal
+    RGB_YELLOW,         # High
+    RGB_RED,            # Dangerously High
 ]
 
 COLOR_BG = RGB_BLACK    # Default background
 COLOR_TXT = RGB_CHROME  # Default text on background
 COLOR_PBAR = RGB_CYAN   # Default progress bar
 
-ROTATE_90 = 90      # Rotate 90 degrees
-STEP_1 = 1          # Display mode step
+ROTATE_90 = 90          # Rotate 90 degrees
+STEP_1 = 1              # Display mode step
 
 BTN_RELEASE = ACTION_RELEASED
+
 
 # =========================================================
 #    K E Y W O R D S   F O R   C O N F I G   F I L E S
@@ -112,6 +114,7 @@ KWD_BTN_DWN = 'BTNDWN'
 KWD_BTN_LFT = 'BTNLFT'
 KWD_BTN_RHT = 'BTNRHT'
 KWD_BTN_MDL = 'BTNMDL'
+# fmt: on
 
 
 # =========================================================
@@ -237,7 +240,7 @@ class SenseHat:
         """SenseHat Joystick dummy event
 
         This is a placeholder event which is assigned when no other
-        action can be tied to a given Sene HAT Joystick event.
+        action can be tied to a given Sense HAT Joystick event.
         """
         pass
 
@@ -426,10 +429,11 @@ class SenseHat:
             data:
                 'dict' as follows:
                     {
-                        "data": [list of values],
-                        "unit" <unit string>,
-                        "label": <label string>,
-                        "limit": [list of limits]
+                        'data': [list of values],
+                        'valid': <tuple with min/max>,
+                        'unit': <unit string>,
+                        'label': <label string>,
+                        'limits': [list of limits]
                     }
         """
 
@@ -449,8 +453,8 @@ class SenseHat:
         # Create a list with 'DISPL_MAX_COL' num values. We add 0 (zero) to the
         # beginning of the list if whole set has less than 'DISPL_MAX_COL' num
         # values. This allows us to simulate 'scrolling' right to left.
-        subSet = data['data'][-DISPL_MAX_COL:]  # Grab last 'n' values that can fit LED
-        lenSet = min(DISPL_MAX_COL, len(subSet))  # Do we have enough data?
+        subSet = data['data'][-DISPL_MAX_COL:]      # Grab last 'n' values that can fit LED
+        lenSet = min(DISPL_MAX_COL, len(subSet))    # Do we have enough data?
 
         # Extend 'value' list as needed
         values = (

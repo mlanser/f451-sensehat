@@ -22,16 +22,8 @@ NOTE: You can run this app in demo mode in (almost) any device even without the 
 
 You can use `pip install` to install this module directly from Github as follows:
 
-Using HTTPS:
-
 ```bash
 $ pip install 'f451-sensehat @ git+https://github.com/mlanser/f451-sensehat.git'
-```
-
-Using SSH:
-
-```bash
-$ pip install 'f451-sensehat @ git+ssh://git@github.com:mlanser/f451-sensehat.git'
 ```
 
 ## How to use
