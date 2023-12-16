@@ -14,42 +14,20 @@ __all__ = [
     'SenseData',
     'SenseObject',
     'TemperatureObject',
-    'COLOR_MAP',
     'TEMP_UNIT_C',
     'TEMP_UNIT_F',
     'TEMP_UNIT_K',
-    'COLOR_LOW',
-    'COLOR_NORM',
-    'COLOR_HIGH',
 ]
 
 
+# fmt: off
 # =========================================================
 #              M I S C .   C O N S T A N T S
 # =========================================================
 TEMP_UNIT_C = 'C'  # Celsius
 TEMP_UNIT_F = 'F'  # Fahrenheit
 TEMP_UNIT_K = 'K'  # Kelvin
-
-# Limit set [A, B, C, D] means:
-#
-#             val <= A -> Dangerously Low   = "red"
-#     B >= val >  A -> Low                  = "yellow"
-#     C >= val >  B -> Normal               = "green"
-#     D >= val >  C -> High                 = "cyan"
-#             val >  D -> Dangerously High  = "blue"
-#
-COLOR_MAP = [
-    'red',              # 0     -- These colors must also work
-    'yellow',           # 1        with 'termcolor' library
-    'green',            # 2
-    'cyan',             # 3
-    'blue',             # 4
-]
-# Shortcuts for indicating main colors
-COLOR_LOW = 0
-COLOR_NORM = 2
-COLOR_HIGH = 4
+# fmt: on
 
 
 # =========================================================
