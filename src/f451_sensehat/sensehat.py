@@ -443,8 +443,8 @@ class SenseHat:
         # Create a list with 'DISPL_MAX_COL' num values. We add 0 (zero) to the
         # beginning of the list if whole set has less than 'DISPL_MAX_COL' num
         # values. This allows us to simulate 'scrolling' right to left.
-        subSet = data['data'][-DISPL_MAX_COL:]      # Grab last 'n' values that can fit LED
-        lenSet = min(DISPL_MAX_COL, len(subSet))    # Do we have enough data?
+        subSet = data['data'][-DISPL_MAX_COL:]  # Grab last 'n' values that can fit LED
+        lenSet = min(DISPL_MAX_COL, len(subSet))  # Do we have enough data?
 
         # Extend 'value' list as needed
         values = (
@@ -470,7 +470,9 @@ class SenseHat:
     def display_as_text(self, *args):
         """Display data points as text in columns
 
-        NOTE: for compatibility only
+        NOTE: For compatibility only! We cannot display
+              this text info in a useful manner on the
+              Sense HAT 8x8 LED display.
 
         Args:
             args: placeholder for compatibility
@@ -481,6 +483,8 @@ class SenseHat:
         """Display text message
 
         This method will redraw the entire LED
+
+        TODO: Not sure what to do with function.
 
         Args:
             msg: 'str' with text to display
@@ -546,21 +550,37 @@ class SenseHat:
             self._SENSE.clear()
 
     def display_8x8_image(self, image):
-        self._SENSE.set_pixels(image)
+        """Display 8x8 image on LED
+
+        Args:
+            image:
+                'list' with 64 tuples, each representing
+                complete RGB value as follows:
+
+                    [(r,g,b), (r,g,b), ... (r,g,b)]
+
+                See demo for example.
+        """
+        # Skip this if we're in 'sleep' mode
+        if not self.displSleepMode:
+            self._SENSE.set_pixels(image)
 
     def display_8x8_message(self, msg):
-        self._SENSE.show_message(msg)
+        """Display scrolling message"""
+        # Skip this if we're in 'sleep' mode
+        if not self.displSleepMode:
+            self._SENSE.show_message(msg)
 
     def debug_joystick(self, direction=''):
-        if direction == "up":
+        if direction == 'up':
             self._SENSE.show_letter('U')
-        elif direction == "down":
+        elif direction == 'down':
             self._SENSE.show_letter('D')
-        elif direction == "left":
+        elif direction == 'left':
             self._SENSE.show_letter('L')
-        elif direction == "right":
+        elif direction == 'right':
             self._SENSE.show_letter('R')
-        elif direction == "press":
+        elif direction == 'press':
             self._SENSE.show_letter('+')
         else:
             self._SENSE.show_letter('?')
