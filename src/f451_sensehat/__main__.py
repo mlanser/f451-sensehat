@@ -41,8 +41,7 @@ def btn_middle(event):
     global EXIT_NOW
 
     if event.action != f451SenseHat.BTN_RELEASE:
-        SENSE_HAT.display_blank()
-        SENSE_HAT.display_off()
+        SENSE_HAT.display_reset()
         EXIT_NOW = True
 
 
@@ -59,7 +58,7 @@ SENSE_HAT.joystick_init(**APP_JOYSTICK_ACTIONS)
 
 def create_image():
     x = (255, 0, 0)         # Color: red
-    o = (255, 255, 255)     # Color: white
+    o = (0, 0, 0)           # Color: black/off
 
     image = [
         o, o, o, x, x, o, o, o,
