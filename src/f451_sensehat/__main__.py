@@ -97,7 +97,7 @@ def main():
 
         # Display text on 8x8 LED
         print("Display message on Sense HAT LED")
-        SENSE_HAT.display_message("Hello world!")
+        SENSE_HAT.display_8x8_message("Hello world!")
 
         print("Display sparkles on Sense HAT LED")
         for _ in range(50):
