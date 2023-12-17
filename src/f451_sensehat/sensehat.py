@@ -227,11 +227,11 @@ class SenseHat:
         sense.clear()  # Clear 8x8 LED
         sense.set_rotation(kwargs.get(KWD_ROTATION, DEF_ROTATION))  # Set initial rotation
 
-        sense.stick.direction_up = kwargs.get(KWD_BTN_UP, SenseHat._btn_dummy)
-        sense.stick.direction_down = kwargs.get(KWD_BTN_UP, SenseHat._btn_dummy)
-        sense.stick.direction_left = kwargs.get(KWD_BTN_UP, SenseHat._btn_dummy)
-        sense.stick.direction_right = kwargs.get(KWD_BTN_UP, SenseHat._btn_dummy)
-        sense.stick.direction_middle = kwargs.get(KWD_BTN_UP, SenseHat._btn_dummy)
+        sense.stick.direction_up = SenseHat._btn_dummy
+        sense.stick.direction_down = SenseHat._btn_dummy
+        sense.stick.direction_left = SenseHat._btn_dummy
+        sense.stick.direction_right = SenseHat._btn_dummy
+        sense.stick.direction_middle = SenseHat._btn_dummy
 
         return sense
 
@@ -340,10 +340,10 @@ class SenseHat:
             kwargs: optional values for joystick actions
         """
         self._SENSE.stick.direction_up = kwargs.get(KWD_BTN_UP, SenseHat._btn_dummy)
-        self._SENSE.stick.direction_down = kwargs.get(KWD_BTN_UP, SenseHat._btn_dummy)
-        self._SENSE.stick.direction_left = kwargs.get(KWD_BTN_UP, SenseHat._btn_dummy)
-        self._SENSE.stick.direction_right = kwargs.get(KWD_BTN_UP, SenseHat._btn_dummy)
-        self._SENSE.stick.direction_middle = kwargs.get(KWD_BTN_UP, SenseHat._btn_dummy)
+        self._SENSE.stick.direction_down = kwargs.get(KWD_BTN_DWN, SenseHat._btn_dummy)
+        self._SENSE.stick.direction_left = kwargs.get(KWD_BTN_LFT, SenseHat._btn_dummy)
+        self._SENSE.stick.direction_right = kwargs.get(KWD_BTN_RHT, SenseHat._btn_dummy)
+        self._SENSE.stick.direction_middle = kwargs.get(KWD_BTN_MDL, SenseHat._btn_dummy)
 
     def display_init(self, **kwargs):
         """Initialize LED display
