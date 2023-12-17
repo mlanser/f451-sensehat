@@ -95,15 +95,15 @@ def main():
             SENSE_HAT.display_sparkle()
             time.sleep(0.2)
 
-        SENSE_HAT.display_blank()
-        SENSE_HAT.display_off()
-
         print('Display image on Sense HAT LED.')
         print('Push joystick UP/DWN/LFT/RHT to rotate image.')
         print('Press middle to end.')
         SENSE_HAT.display_8x8_image(create_image())
         while not EXIT_NOW:
             pass
+
+        SENSE_HAT.display_blank()
+        SENSE_HAT.display_off()
 
     else:
         print("\nSkipping LED demo since we don't have a real Sense HAT")
