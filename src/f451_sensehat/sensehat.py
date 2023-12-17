@@ -377,7 +377,7 @@ class SenseHat:
         self._SENSE.set_rotation(self.displRotation)
 
         # Wake up display?
-        if not self.displSleepMode:
+        if self.displSleepMode:
             self.display_on()
 
     def display_on(self):
@@ -394,10 +394,8 @@ class SenseHat:
     def display_blank(self):
         """Show clear/blank LED"""
         # Skip this if we're in 'sleep' mode
-        if self.displSleepMode:
-            return
-
-        self._SENSE.clear()  # Clear 8x8 LED
+        if not self.displSleepMode:
+            self._SENSE.clear()  # Clear 8x8 LED
 
     def display_reset(self):
         """Reset and clear LED"""
