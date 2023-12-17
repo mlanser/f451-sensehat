@@ -318,17 +318,21 @@ class SenseHat:
         on whether one or more args are 'True'
 
         Args:
-            args: list of one or more flags
+            args: list of one or more flags. If any flag is 'True' 
+            then we 'wake' up display
         """
-        sleep = any(args)
-
-        # Do we need to turn off LED?
-        if sleep and not self.displSleepMode:
+        if any(args):
+            self.display_on()
+        else:
             self.display_off()
 
-        # Do we need to turn on LED?
-        elif not sleep and self.displSleepMode:
-            self.display_on()
+        # # Do we need to turn off LED?
+        # if sleep and not self.displSleepMode:
+        #     self.display_off()
+
+        # # Do we need to turn on LED?
+        # elif not sleep and self.displSleepMode:
+        #     self.display_on()
 
     def joystick_init(self, **kwargs):
         """Initialize Sense HAT joystick
