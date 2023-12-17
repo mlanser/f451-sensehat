@@ -92,20 +92,25 @@ def create_image():
 def main():
     # Skip display demos if we're using fake HAT
     if not SENSE_HAT.is_fake():
+        print("Initializing Sense HAT")
         SENSE_HAT.display_init()
 
         # Display text on 8x8 LED
+        print("Display message on Sense HAT LED")
         SENSE_HAT.display_message("Hello world!")
 
-        for _ in range(100):
+        print("Display sparkles on Sense HAT LED")
+        for _ in range(50):
             SENSE_HAT.display_sparkle()
             time.sleep(0.2)
 
         SENSE_HAT.display_blank()
         SENSE_HAT.display_off()
 
+        print("Display image on Sense HAT LED.")
+        print("Push joystick UP/DWN/LFT/RHT to rotate image.")
+        print("Press middle to end.")
         SENSE_HAT.display_8x8_image(create_image())
-
         while not EXIT_NOW:
             pass
 

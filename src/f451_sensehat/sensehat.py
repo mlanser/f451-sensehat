@@ -64,7 +64,7 @@ DISPL_MAX_ROW = 8
 PROX_DEBOUNCE = 0.5     # Delay to debounce proximity sensor on 'tap'
 PROX_LIMIT = 1500       # Threshold for proximity sensor to detect 'tap'
 
-MAX_SPARKLE_PCNT = 0.1  # 10% sparkles
+MAX_SPARKLE_PCNT = 0.2  # 20% sparkles
 
 RGB_BLACK = (0, 0, 0)
 RGB_WHITE = (255, 255, 255)
@@ -547,6 +547,9 @@ class SenseHat:
 
     def display_8x8_image(self, image):
         self._SENSE.set_pixels(image)
+
+    def display_8x8_message(self, msg):
+        self._SENSE.show_message(msg)
 
     def debug_joystick(self, direction=''):
         if direction == "up":
