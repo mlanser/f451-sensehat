@@ -319,12 +319,14 @@ class SenseHat:
 
         Args:
             args: list of one or more flags. If any flag is 'True' 
-            then we 'wake' up display
+            then we 'go to sleep' and turn off display
         """
         if any(args):
-            self.display_on()
-        else:
+            # self.display_on()
             self.display_off()
+        else:
+            self.display_on()
+            # self.display_off()
 
         # # Do we need to turn off LED?
         # if sleep and not self.displSleepMode:
