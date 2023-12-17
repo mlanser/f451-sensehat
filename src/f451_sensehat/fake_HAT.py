@@ -7,7 +7,7 @@ random values within the limits of the actual hardware.
 
 import random
 
-
+# fmt: off
 # =========================================================
 #              M I S C .   C O N S T A N T S
 # =========================================================
@@ -24,6 +24,7 @@ HUMID_MAX = 100.0
 
 LED_WIDTH = 8
 LED_HEIGHT = 8
+# fmt: on
 
 
 # =========================================================
@@ -68,3 +69,6 @@ class FakeSenseHat:
     
     def get_humidity(self):
         return random.randint(int(HUMID_MIN * 10), int(HUMID_MAX * 10)) / 10
+    
+    def show_letter(self, *args):
+        pass

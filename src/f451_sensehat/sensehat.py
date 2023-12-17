@@ -554,3 +554,17 @@ class SenseHat:
             self._SENSE.set_pixel(x, y, r, g, b)
         else:
             self._SENSE.clear()
+
+    def debug_joystick(self, direction=''):
+        if direction == "up":
+            self._SENSE.show_letter('U')
+        elif direction == "down":
+            self._SENSE.show_letter('D')
+        elif direction == "left":
+            self._SENSE.show_letter('L')
+        elif direction == "right":
+            self._SENSE.show_letter('R')
+        elif direction == "press":
+            self._SENSE.show_letter('+')
+        else:
+            self._SENSE.show_letter('?')
