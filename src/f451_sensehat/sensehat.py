@@ -545,6 +545,9 @@ class SenseHat:
         else:
             self._SENSE.clear()
 
+    def display_8x8_image(self, image):
+        self._SENSE.set_pixels(image)
+
     def debug_joystick(self, direction=''):
         if direction == "up":
             self._SENSE.show_letter('U')
