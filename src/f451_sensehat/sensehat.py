@@ -543,6 +543,7 @@ class SenseHat:
         if randint(0, maxSparkle):
             # x, y, rgb = _sparkle()
             numSparkles = randint(0, maxSparkle)
+            print(numSparkles)
             # pixels = [(0,0,0) for _ in range(DISPL_MAX_COL * yMax)]
             for _ in range(numSparkles):
                 x, y, rgb = _sparkle()
@@ -553,6 +554,7 @@ class SenseHat:
             # self._SENSE.set_pixels(pixels)
             # self._SENSE.set_pixel(x, y, rgb)
         else:
+            print("-CLEAR-")
             self._SENSE.clear()
 
     def display_8x8_image(self, image):
