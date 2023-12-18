@@ -435,7 +435,7 @@ class SenseHat:
 
         def _clamp(val, minVal=0, maxVal=1):
             return min(max(float(minVal), float(val)), float(maxVal))
-        
+
         def _get_rgb(val, curRow, maxRow):
             # Should the pixel on this row be black?
             if curRow < (maxRow - int(val * maxRow)):
@@ -454,7 +454,7 @@ class SenseHat:
         # num values. This allows us to simulate 'scrolling' right to left. We 
         # grab last 'n' values that can fit LED and scrub any 'None' values. If
         # there are not enough values to to fill display, we add 0's
-        subSet = _scrub(data.data[-DISPL_MAX_COL:]) 
+        subSet = _scrub(data.data[-DISPL_MAX_COL:])
         lenSet = min(DISPL_MAX_COL, len(subSet))
 
         # Extend 'value' list as needed
@@ -473,11 +473,14 @@ class SenseHat:
         colors = [_clamp((v - vmin + 1) / (vmax - vmin + 1)) for v in values]
 
         # Reserve space for progress bar?
-        yMax = DISPL_MAX_ROW - 1 if (self.displProgress) else DISPL_MAX_ROW
-
+        yMax = DISPL_MAX_ROW - 1 if self.displProgress else DISPL_MAX_ROW
         pixels = [
             _get_rgb(colors[col], row, yMax) for row in range(yMax) for col in range(DISPL_MAX_COL)
         ]
+
+        if self.displProgress:
+            currPixels = self._SENSE.get_pixels()
+            pixels += currPixels[-8:]
 
         self._SENSE.set_pixels(pixels)
 
@@ -542,19 +545,8 @@ class SenseHat:
         maxSparkle = int(DISPL_MAX_COL * yMax * MAX_SPARKLE_PCNT)
         if randint(0, maxSparkle):
             x, y, rgb = _sparkle()
-            # numSparkles = randint(0, maxSparkle)
-            # print(numSparkles)
-            # pixels = [(0,0,0) for _ in range(DISPL_MAX_COL * yMax)]
-            # for _ in range(numSparkles):
-            #     x, y, rgb = _sparkle()
-            #     self._SENSE.set_pixel(x, y, rgb)
-                # indx = y * yMax + x
-                # pixels[indx] = rgb
-
-            # self._SENSE.set_pixels(pixels)
             self._SENSE.set_pixel(x, y, rgb)
         else:
-            # print("-CLEAR-")
             self._SENSE.clear()
 
     def display_8x8_image(self, image):
@@ -577,7 +569,7 @@ class SenseHat:
         """Display scrolling message"""
         # Skip this if we're in 'sleep' mode
         if not self.displSleepMode:
-            self._SENSE.show_message(msg)
+            self._SENSE.show_message(msg, RGB_RED)
 
     def debug_joystick(self, direction=''):
         if direction == 'up':
