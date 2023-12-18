@@ -550,13 +550,14 @@ class SenseHat:
         maxSparkle = int(DISPL_MAX_COL * yMax * MAX_SPARKLE_PCNT)
         if randint(0, maxSparkle):
             numSparkles = randint(0, maxSparkle)
-            pixels = [(0,0,0) for _ in range(DISPL_MAX_COL * yMax)]
+            # pixels = [(0,0,0) for _ in range(DISPL_MAX_COL * yMax)]
             for _ in range(numSparkles):
                 x, y, rgb = _sparkle()
-                indx = y * yMax + x
-                pixels[indx] = rgb
+                self._SENSE.set_pixel(x, y, rgb)
+                # indx = y * yMax + x
+                # pixels[indx] = rgb
 
-            self._SENSE.set_pixels(pixels)
+            # self._SENSE.set_pixels(pixels)
             # self._SENSE.set_pixel(x, y, r, g, b)
         else:
             self._SENSE.clear()
