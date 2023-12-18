@@ -478,6 +478,8 @@ class SenseHat:
             _get_rgb(colors[col], row, yMax) for row in range(yMax) for col in range(DISPL_MAX_COL)
         ]
 
+        # If there's a progress bar on bottom (8th) row, lets copy the existing 
+        # pixels, and then append them to the new (7 row) pixel list
         if self.displProgress:
             currPixels = self._SENSE.get_pixels()
             pixels += currPixels[-8:]
@@ -569,7 +571,7 @@ class SenseHat:
         """Display scrolling message"""
         # Skip this if we're in 'sleep' mode
         if not self.displSleepMode:
-            self._SENSE.show_message(msg, text_colour = RGB_RED)
+            self._SENSE.show_message(msg, text_colour = RGB_RED, back_colour = RGB_CHROME)
 
     def debug_joystick(self, direction=''):
         if direction == 'up':
