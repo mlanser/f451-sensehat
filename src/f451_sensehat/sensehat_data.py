@@ -8,12 +8,13 @@ Dependencies:
     - deque - double-ended queue from 'collections' library
 """
 
-from collections import deque
+from collections import deque, namedtuple
 
 __all__ = [
     'SenseData',
     'SenseObject',
     'TemperatureObject',
+    'DataUnit',
     'TEMP_UNIT_C',
     'TEMP_UNIT_F',
     'TEMP_UNIT_K',
@@ -33,6 +34,9 @@ TEMP_UNIT_K = 'K'  # Kelvin
 # =========================================================
 #                     M A I N   C L A S S
 # =========================================================
+# Common graph data structure
+DataUnit = namedtuple("DataUnit", "data valid unit label limits")
+
 class SenseObject:
     """Data structure for environment data object.
 
@@ -45,6 +49,7 @@ class SenseObject:
 
     Methods:
         as_dict: return data attributes as 'dict'
+        as_tuple: return data attributes as 'namedtuple' 'DataUnit'
     """
 
     def __init__(self, data, valid, unit, limits, label):
@@ -64,6 +69,9 @@ class SenseObject:
             'label': self.label.capitalize(),
         }
 
+    def as_tuple(self):
+        """Return data object as 'namedtuple' 'DataUnit' with each attribute as key."""
+        return DataUnit(**self.as_dict())
 
 class TemperatureObject(SenseObject):
     """Data structure for environment data object.
@@ -106,6 +114,10 @@ class TemperatureObject(SenseObject):
             'limits': self.limits,
             'label': self.label.capitalize(),
         }
+
+    def as_tuple(self):
+        """Return data object as 'namedtuple' 'DataUnit' with each attribute as key."""
+        return DataUnit(**self.as_dict())
 
     @staticmethod
     def _convert_C2F(celsius):

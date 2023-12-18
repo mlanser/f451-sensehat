@@ -17,7 +17,6 @@ Dependencies:
 import colorsys
 
 from random import randint
-
 from subprocess import PIPE, Popen
 
 try:
@@ -421,14 +420,12 @@ class SenseHat:
 
         Args:
             data:
-                'dict' as follows:
-                    {
-                        'data': [list of values],
-                        'valid': <tuple with min/max>,
-                        'unit': <unit string>,
-                        'label': <label string>,
-                        'limits': [list of limits]
-                    }
+                'DataUnit' named tuple with the following fields:
+                    data   = [list of values],
+                    valid  = <tuple with min/max>,
+                    unit   = <unit string>,
+                    label  = <label string>,
+                    limits = [list of limits]
         """
 
         def _get_rgb(val, curRow, maxRow):
@@ -438,7 +435,7 @@ class SenseHat:
 
             # Convert the values to colors from red to blue
             color = (1.0 - val) * 0.6
-            return tuple([int(x * 255.0) for x in colorsys.hsv_to_rgb(color, 1.0, 1.0)])
+            return tuple(int(x * 255.0) for x in colorsys.hsv_to_rgb(color, 1.0, 1.0))
 
         # Skip this if we're in 'sleep' mode
         if self.displSleepMode:
@@ -447,8 +444,8 @@ class SenseHat:
         # Create a list with 'DISPL_MAX_COL' num values. We add 0 (zero) to the
         # beginning of the list if whole set has less than 'DISPL_MAX_COL' num
         # values. This allows us to simulate 'scrolling' right to left.
-        subSet = data['data'][-DISPL_MAX_COL:]  # Grab last 'n' values that can fit LED
-        lenSet = min(DISPL_MAX_COL, len(subSet))  # Do we have enough data?
+        subSet = data.data[-DISPL_MAX_COL:]         # Grab last 'n' values that can fit LED
+        lenSet = min(DISPL_MAX_COL, len(subSet))    # Do we have enough data?
 
         # Extend 'value' list as needed
         values = (
@@ -508,7 +505,6 @@ class SenseHat:
 
         # # Display results
         # self._LED.display(self._img)
-        pass
 
     def display_progress(self, inFrctn=0.0):
         """Update progressbar on LED
