@@ -389,7 +389,7 @@ class SenseHat:
         """Turn 'on' LED display"""
         self._SENSE.low_light = True
         self.displSleepMode = False  # Reset 'sleep mode' flag
-        self.display_blank()
+        # self.display_blank()
 
     def display_off(self):
         """Turn 'off' LED display"""
