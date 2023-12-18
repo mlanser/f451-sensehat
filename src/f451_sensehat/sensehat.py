@@ -569,7 +569,7 @@ class SenseHat:
         """Display scrolling message"""
         # Skip this if we're in 'sleep' mode
         if not self.displSleepMode:
-            self._SENSE.show_message(msg, RGB_RED)
+            self._SENSE.show_message(msg, text_colour = RGB_RED)
 
     def debug_joystick(self, direction=''):
         if direction == 'up':
