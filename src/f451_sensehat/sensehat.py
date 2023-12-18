@@ -407,7 +407,7 @@ class SenseHat:
         self._SENSE.low_light = False
         self._SENSE.clear()  # Clear 8x8 LED
 
-    def display_as_graph(self, data):
+    def display_as_graph(self, data, minMax=None):
         """Display graph and data point as text label
 
         This method will redraw the entire 8x8 LED all at once. That means
@@ -426,6 +426,8 @@ class SenseHat:
                     unit   = <unit string>,
                     label  = <label string>,
                     limits = [list of limits]
+            minMax:
+                'tuple' with min/max values. If 'None' then calculate locally.
         """
 
         def _scrub_data(data):
@@ -461,8 +463,8 @@ class SenseHat:
         )
 
         # Scale incoming values in the data set to be between 0 and 1
-        vmin = min(values)
-        vmax = max(values)
+        vmin = min(values) if minMax is None else minMax[0]
+        vmax = max(values) if minMax is None else minMax[1]
         colors = [(v - vmin + 1) / (vmax - vmin + 1) for v in values]
 
         # Reserve space for progress bar?
