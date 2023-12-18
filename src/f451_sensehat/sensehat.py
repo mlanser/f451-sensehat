@@ -434,6 +434,9 @@ class SenseHat:
             """Scrub 'None' from data"""
             return [0 if i is None else i for i in data]
 
+        def _clamp(val, minVal=0, maxVal=1):
+            return min(max(float(minVal), float(val)), float(maxVal))
+        
         def _get_rgb(val, curRow, maxRow):
             # Should the pixel on this row be black?
             if curRow < (maxRow - int(val * maxRow)):
@@ -465,7 +468,7 @@ class SenseHat:
         # Scale incoming values in the data set to be between 0 and 1
         vmin = min(values) if minMax is None else minMax[0]
         vmax = max(values) if minMax is None else minMax[1]
-        colors = [(v - vmin + 1) / (vmax - vmin + 1) for v in values]
+        colors = [_clamp((v - vmin + 1) / (vmax - vmin + 1)) for v in values]
 
         # Reserve space for progress bar?
         yMax = DISPL_MAX_ROW - 1 if (self.displProgress) else DISPL_MAX_ROW
