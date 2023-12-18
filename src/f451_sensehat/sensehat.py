@@ -430,7 +430,7 @@ class SenseHat:
                 'tuple' with min/max values. If 'None' then calculate locally.
         """
 
-        def _scrub_data(data):
+        def _scrub(data):
             """Scrub 'None' from data"""
             return [0 if i is None else i for i in data]
 
@@ -455,7 +455,7 @@ class SenseHat:
         # num values. This allows us to simulate 'scrolling' right to left. We 
         # grab last 'n' values that can fit LED and scrub any 'None' values. If
         # there are not enough values to to fill display, we add 0's
-        subSet = _scrub_data(data.data[-DISPL_MAX_COL:]) 
+        subSet = _scrub(data.data[-DISPL_MAX_COL:]) 
         lenSet = min(DISPL_MAX_COL, len(subSet))
 
         # Extend 'value' list as needed
@@ -465,7 +465,10 @@ class SenseHat:
             else [0 for _ in range(DISPL_MAX_COL - lenSet)] + subSet
         )
 
-        # Scale incoming values in the data set to be between 0 and 1
+        # Scale incoming values in the data set to be between 0 and 1. We may need
+        # to clamp values when outside min/max values are outside min/max for current 
+        # sub-set. This can happen when original data set has more values than the
+        # chunk (8 values) that we display on the Sense HAT 8x8 LED.
         vmin = min(values) if minMax is None else minMax[0]
         vmax = max(values) if minMax is None else minMax[1]
         colors = [_clamp((v - vmin + 1) / (vmax - vmin + 1)) for v in values]
@@ -483,11 +486,8 @@ class SenseHat:
         """Display data points as text in columns
 
         NOTE: For compatibility only! We cannot display
-              this text info in a useful manner on the
-              Sense HAT 8x8 LED display.
-
-        Args:
-            args: placeholder for compatibility
+              this text info in a meaningful manner on 
+              the Sense HAT 8x8 LED display.
         """
         pass
 
@@ -496,26 +496,10 @@ class SenseHat:
 
         This method will redraw the entire LED
 
-        TODO: Not sure what to do with function.
-
         Args:
             msg: 'str' with text to display
         """
-        # Skip this if we're in 'sleep' mode
-        if self.displSleepMode:
-            return
-
-        # # Reserve space for progress bar?
-        # yMin = 2 if (self.displProgress) else 0
-        # self._draw.rectangle((0, yMin, self._LED.width, self._LED.height), RGB_BLACK)
-
-        # # Draw message
-        # x = DEF_LED_OFFSET_X
-        # y = DEF_LED_OFFSET_Y + int((self._LED.height - FONT_SIZE_LG) / 2)
-        # self._draw.text((x, y), str(msg), font=self._fontLG, fill=COLOR_TXT)
-
-        # # Display results
-        # self._LED.display(self._img)
+        self.display_8x8_message(msg)
 
     def display_progress(self, inFrctn=0.0):
         """Update progressbar on LED
