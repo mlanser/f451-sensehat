@@ -428,6 +428,10 @@ class SenseHat:
                     limits = [list of limits]
         """
 
+        def _scrub_data(data):
+            """Scrub 'None' from data"""
+            return [0 if i is None else i for i in data]
+
         def _get_rgb(val, curRow, maxRow):
             # Should the pixel on this row be black?
             if curRow < (maxRow - int(val * maxRow)):
@@ -441,11 +445,13 @@ class SenseHat:
         if self.displSleepMode:
             return
 
-        # Create a list with 'DISPL_MAX_COL' num values. We add 0 (zero) to the
-        # beginning of the list if whole set has less than 'DISPL_MAX_COL' num
-        # values. This allows us to simulate 'scrolling' right to left.
-        subSet = data.data[-DISPL_MAX_COL:]         # Grab last 'n' values that can fit LED
-        lenSet = min(DISPL_MAX_COL, len(subSet))    # Do we have enough data?
+        # Create a list with 'DISPL_MAX_COL' num values. We add 0 (zero) to 
+        # the beginning of the list if whole set has less than 'DISPL_MAX_COL' 
+        # num values. This allows us to simulate 'scrolling' right to left. We 
+        # grab last 'n' values that can fit LED and scrub any 'None' values. If
+        # there are not enough values to to fill display, we add 0's
+        subSet = _scrub_data(data.data[-DISPL_MAX_COL:]) 
+        lenSet = min(DISPL_MAX_COL, len(subSet))
 
         # Extend 'value' list as needed
         values = (
