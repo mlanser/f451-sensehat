@@ -541,19 +541,19 @@ class SenseHat:
         # Do we want to clear the screen? Or add more sparkles?
         maxSparkle = int(DISPL_MAX_COL * yMax * MAX_SPARKLE_PCNT)
         if randint(0, maxSparkle):
-            x, y, rgb = _sparkle()
-            # numSparkles = randint(0, maxSparkle)
+            # x, y, rgb = _sparkle()
+            numSparkles = randint(0, maxSparkle)
             # pixels = [(0,0,0) for _ in range(DISPL_MAX_COL * yMax)]
-            # for _ in range(numSparkles):
-            #     x, y, rgb = _sparkle()
-            #     self._SENSE.set_pixel(x, y, rgb)
+            for _ in range(numSparkles):
+                x, y, rgb = _sparkle()
+                self._SENSE.set_pixel(x, y, rgb)
                 # indx = y * yMax + x
                 # pixels[indx] = rgb
 
             # self._SENSE.set_pixels(pixels)
-            self._SENSE.set_pixel(x, y, rgb)
-        # else:
-        #     self._SENSE.clear()
+            # self._SENSE.set_pixel(x, y, rgb)
+        else:
+            self._SENSE.clear()
 
     def display_8x8_image(self, image):
         """Display 8x8 image on LED
