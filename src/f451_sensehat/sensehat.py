@@ -389,7 +389,6 @@ class SenseHat:
         """Turn 'on' LED display"""
         self._SENSE.low_light = True
         self.displSleepMode = False  # Reset 'sleep mode' flag
-        # self.display_blank()
 
     def display_off(self):
         """Turn 'off' LED display"""
@@ -553,8 +552,8 @@ class SenseHat:
 
             # self._SENSE.set_pixels(pixels)
             self._SENSE.set_pixel(x, y, rgb)
-        else:
-            self._SENSE.clear()
+        # else:
+        #     self._SENSE.clear()
 
     def display_8x8_image(self, image):
         """Display 8x8 image on LED
