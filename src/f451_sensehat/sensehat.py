@@ -523,6 +523,15 @@ class SenseHat:
 
     def display_sparkle(self):
         """Show random sparkles on LED"""
+        def _sparkle():
+            x = randint(0, DISPL_MAX_COL - 1)
+            y = randint(0, yMax - 1)
+            r = randint(0, 255)
+            g = randint(0, 255)
+            b = randint(0, 255)
+
+            return x, y, (r, g, b)
+
         # Skip this if we're in 'sleep' mode
         if self.displSleepMode:
             return
@@ -531,16 +540,24 @@ class SenseHat:
         yMax = DISPL_MAX_ROW - 1 if (self.displProgress) else DISPL_MAX_ROW
 
         # Create sparkles
-        x = randint(0, DISPL_MAX_COL - 1)
-        y = randint(0, yMax - 1)
-        r = randint(0, 255)
-        g = randint(0, 255)
-        b = randint(0, 255)
+        # x = randint(0, DISPL_MAX_COL - 1)
+        # y = randint(0, yMax - 1)
+        # r = randint(0, 255)
+        # g = randint(0, 255)
+        # b = randint(0, 255)
 
         # Do we want to clear the screen? Or add more sparkles?
         maxSparkle = int(DISPL_MAX_COL * yMax * MAX_SPARKLE_PCNT)
         if randint(0, maxSparkle):
-            self._SENSE.set_pixel(x, y, r, g, b)
+            numSparkles = randint(0, maxSparkle)
+            pixels = [(0,0,0) for _ in range(DISPL_MAX_COL * yMax)]
+            for _ in range(numSparkles):
+                x, y, rgb = _sparkle()
+                indx = y * yMax + x
+                pixels[indx] = rgb
+
+            self._SENSE.set_pixels(pixels)
+            # self._SENSE.set_pixel(x, y, r, g, b)
         else:
             self._SENSE.clear()
 
