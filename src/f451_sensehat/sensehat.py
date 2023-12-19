@@ -346,7 +346,7 @@ class SenseHat:
         """
         if any(args) and not self.displSleepMode:
             self.display_off()
-        elif not any(args) or self.displSleepMode:
+        elif not any(args) and self.displSleepMode:
             self.display_on()
 
     def joystick_init(self, **kwargs):
