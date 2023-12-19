@@ -548,7 +548,7 @@ class SenseHat:
         for x in range(col):
             self._SENSE.set_pixel(x, DISPL_MAX_ROW - 1, COLOR_PBAR_FG)
         for x in range(col, DISPL_MAX_COL):
-            self._SENSE.set_pixel(x, DISPL_MAX_ROW - 1, (3,3,3))
+            self._SENSE.set_pixel(x, DISPL_MAX_ROW - 1, (33, 46, 82))
 
     def display_sparkle(self):
         """Show random sparkles on LED"""
