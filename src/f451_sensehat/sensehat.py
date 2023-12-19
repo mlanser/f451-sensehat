@@ -541,7 +541,7 @@ class SenseHat:
         # If we're starting over (i.e. 'col' is 0), then we need to blank
         # out entire row
         maxCol = col or DISPL_MAX_COL
-        color = COLOR_PBAR if col else COLOR_BLACK
+        color = COLOR_PBAR if col else RGB_BLACK
 
         # Light up the row!
         for x in range(maxCol):
@@ -575,7 +575,7 @@ class SenseHat:
             # and add back in the last row with the progress bar
             if self.displProgress:
                 currPixels = self._SENSE.get_pixels()
-                pixels = [(0,0,0) for _ in range(DISPL_MAX_COL * yMax)] + currPixels[-DISPL_MAX_COL:]
+                pixels = [RGB_BLACK for _ in range(DISPL_MAX_COL * yMax)] + currPixels[-DISPL_MAX_COL:]
                 self._SENSE.set_pixels(pixels)
             else:
                 self._SENSE.clear()
