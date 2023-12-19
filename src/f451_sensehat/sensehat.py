@@ -15,6 +15,7 @@ Dependencies:
 """
 
 import colorsys
+from curses import COLOR_BLACK
 
 from random import randint
 from subprocess import PIPE, Popen
@@ -495,7 +496,7 @@ class SenseHat:
         # pixels, and then append them to the new (7 row) pixel list
         if self.displProgress:
             currPixels = self._SENSE.get_pixels()
-            pixels += currPixels[-8:]
+            pixels += currPixels[-DISPL_MAX_COL:]
 
         self._SENSE.set_pixels(pixels)
 
@@ -535,10 +536,16 @@ class SenseHat:
 
         # Calculate X value. We ensure that we do not go over max width
         # of LED by limiting any input value to a range of 0.0 - 1.0
-        col = int(max(min(float(inFrctn), 1.0), 0.0) * DISPL_MAX_COL)
+        col = int(max(min(float(inFrctn), 1.0), 0.0)) * DISPL_MAX_COL
 
-        for x in range(col):
-            self._SENSE.set_pixel(x, DISPL_MAX_ROW - 1, COLOR_PBAR)
+        # If we're starting over (i.e. 'col' is 0), then we need to blank
+        # out entire row
+        maxCol = col or DISPL_MAX_COL
+        color = COLOR_PBAR if col else COLOR_BLACK
+
+        # Light up the row!
+        for x in range(maxCol):
+            self._SENSE.set_pixel(x, DISPL_MAX_ROW - 1, color)
 
     def display_sparkle(self):
         """Show random sparkles on LED"""
@@ -564,7 +571,14 @@ class SenseHat:
             x, y, rgb = _sparkle()
             self._SENSE.set_pixel(x, y, rgb)
         else:
-            self._SENSE.clear()
+            # If we have a progress bar, we'll create a blank top 
+            # and add back in the last row with the progress bar
+            if self.displProgress:
+                currPixels = self._SENSE.get_pixels()
+                pixels = [(0,0,0) for _ in range(DISPL_MAX_COL * yMax)] + currPixels[-DISPL_MAX_COL:]
+                self._SENSE.set_pixels(pixels)
+            else:
+                self._SENSE.clear()
 
     def display_8x8_image(self, image):
         """Display 8x8 image on LED
