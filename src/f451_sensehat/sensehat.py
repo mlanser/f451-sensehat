@@ -310,6 +310,9 @@ class SenseHat:
         if not self.displSleepMode:
             self.display_on()
 
+        # Clear the display
+        self._SENSE.clear()
+
     def update_sleep_mode(self, *args):
         """Enable or disable LED sleep mode
 
@@ -321,19 +324,9 @@ class SenseHat:
             then we 'go to sleep' and turn off display
         """
         if any(args):
-            # self.display_on()
             self.display_off()
         else:
             self.display_on()
-            # self.display_off()
-
-        # # Do we need to turn off LED?
-        # if sleep and not self.displSleepMode:
-        #     self.display_off()
-
-        # # Do we need to turn on LED?
-        # elif not sleep and self.displSleepMode:
-        #     self.display_on()
 
     def joystick_init(self, **kwargs):
         """Initialize Sense HAT joystick
@@ -571,7 +564,7 @@ class SenseHat:
         """Display scrolling message"""
         # Skip this if we're in 'sleep' mode
         if not self.displSleepMode:
-            self._SENSE.show_message(msg, text_colour = RGB_RED, back_colour = RGB_CHROME)
+            self._SENSE.show_message(msg, text_colour = RGB_RED, back_colour = RGB_GREY)
 
     def debug_joystick(self, direction=''):
         if direction == 'up':
