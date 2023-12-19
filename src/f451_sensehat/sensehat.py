@@ -79,6 +79,7 @@ RGB_CHROME = (219, 226, 233)    # Chrome (lt grey)
 RGB_GREY = (67, 70, 75)         # Dark Steel Grey
 RGB_GREY2 = (57, 61, 71)        # Anthracite
 RGB_PURPLE = (127, 0, 255)
+RGB_GREY_BLUE = (33, 46, 82)
 
 # RGB colors and palette for values on combo/text screen
 COLOR_PALETTE = [
@@ -92,7 +93,7 @@ COLOR_PALETTE = [
 COLOR_BG = RGB_BLACK            # Default background
 COLOR_TXT = RGB_CHROME          # Default text on background
 COLOR_PBAR_FG = RGB_CYAN        # Default prog bar color
-COLOR_PBAR_BG = RGB_GREY2       # Default prog bar background
+COLOR_PBAR_BG = RGB_GREY_BLUE   # Default prog bar background
 
 ROTATE_90 = 90          # Rotate 90 degrees
 STEP_1 = 1              # Display mode step
@@ -539,16 +540,13 @@ class SenseHat:
         # of LED by limiting any input value to a range of 0.0 - 1.0
         col = int(max(min(float(inFrctn), 1.0), 0.0) * DISPL_MAX_COL)
 
-        # If we're starting over (i.e. 'col' is 0), then we need to blank
-        # out entire row
-        # maxCol = col or DISPL_MAX_COL
-        # color = COLOR_PBAR_FG if col else COLOR_PBAR_BG
-
-        # Light up the row!
+        # First, paint forteground color to indicate progress. Then
+        # paint remainder of row with background color so user can
+        # see that entire bottom row is reserved for prog bar.
         for x in range(col):
             self._SENSE.set_pixel(x, DISPL_MAX_ROW - 1, COLOR_PBAR_FG)
         for x in range(col, DISPL_MAX_COL):
-            self._SENSE.set_pixel(x, DISPL_MAX_ROW - 1, (33, 46, 82))
+            self._SENSE.set_pixel(x, DISPL_MAX_ROW - 1, COLOR_PBAR_BG)
 
     def display_sparkle(self):
         """Show random sparkles on LED"""
