@@ -47,24 +47,24 @@ __all__ = [
 # =========================================================
 #              M I S C .   C O N S T A N T S
 # =========================================================
-DEF_ROTATION = 0        # Default display rotation
-DEF_DISPL_MODE = 0      # Default display mode
-DEF_SLEEP = 600         # Default time to sleep (in seconds)
-DEF_LED_OFFSET_X = 0    # Default horizontal offset for LED
-DEF_LED_OFFSET_Y = 0    # Default vertical offseet for LED
+DEF_ROTATION = 0                # Default display rotation
+DEF_DISPL_MODE = 0              # Default display mode
+DEF_SLEEP = 600                 # Default time to sleep (in seconds)
+DEF_LED_OFFSET_X = 0            # Default horizontal offset for LED
+DEF_LED_OFFSET_Y = 0            # Default vertical offseet for LED
 
 STATUS_ON = True
 STATUS_OFF = False
 
-DISPL_TOP_X = 0         # X/Y ccordinate of top-left corner for LED content
+DISPL_TOP_X = 0                 # X/Y ccordinate of top-left corner for LED content
 DISPL_TOP_Y = 0
-DISPL_MAX_COL = 8       # sense has an 8x8 LED display
+DISPL_MAX_COL = 8               # sense has an 8x8 LED display
 DISPL_MAX_ROW = 8
 
-PROX_DEBOUNCE = 0.5     # Delay to debounce proximity sensor on 'tap'
-PROX_LIMIT = 1500       # Threshold for proximity sensor to detect 'tap'
+PROX_DEBOUNCE = 0.5             # Delay to debounce proximity sensor on 'tap'
+PROX_LIMIT = 1500               # Threshold for proximity sensor to detect 'tap'
 
-MAX_SPARKLE_PCNT = 0.2  # 20% sparkles
+MAX_SPARKLE_PCNT = 0.2          # 20% sparkles
 
 RGB_BLACK = (0, 0, 0)
 RGB_WHITE = (255, 255, 255)
@@ -82,16 +82,17 @@ RGB_PURPLE = (127, 0, 255)
 
 # RGB colors and palette for values on combo/text screen
 COLOR_PALETTE = [
-    RGB_BLUE,           # Dangerously Low
-    RGB_CYAN,           # Low
-    RGB_GREEN,          # Normal
-    RGB_YELLOW,         # High
-    RGB_RED,            # Dangerously High
+    RGB_BLUE,                   # Dangerously Low
+    RGB_CYAN,                   # Low
+    RGB_GREEN,                  # Normal
+    RGB_YELLOW,                 # High
+    RGB_RED,                    # Dangerously High
 ]
 
-COLOR_BG = RGB_BLACK    # Default background
-COLOR_TXT = RGB_CHROME  # Default text on background
-COLOR_PBAR = RGB_CYAN   # Default progress bar
+COLOR_BG = RGB_BLACK            # Default background
+COLOR_TXT = RGB_CHROME          # Default text on background
+COLOR_PBAR_FG = RGB_CYAN        # Default prog bar color
+COLOR_PBAR_BG = RGB_GREY2       # Default prog bar background
 
 ROTATE_90 = 90          # Rotate 90 degrees
 STEP_1 = 1              # Display mode step
@@ -540,12 +541,14 @@ class SenseHat:
 
         # If we're starting over (i.e. 'col' is 0), then we need to blank
         # out entire row
-        maxCol = col or DISPL_MAX_COL
-        color = COLOR_PBAR if col else RGB_BLACK
+        # maxCol = col or DISPL_MAX_COL
+        # color = COLOR_PBAR_FG if col else COLOR_PBAR_BG
 
         # Light up the row!
-        for x in range(maxCol):
-            self._SENSE.set_pixel(x, DISPL_MAX_ROW - 1, color)
+        for x in range(col):
+            self._SENSE.set_pixel(x, DISPL_MAX_ROW - 1, COLOR_PBAR_FG)
+        for x in range(DISPL_MAX_COL - col):
+            self._SENSE.set_pixel(x, DISPL_MAX_ROW - 1, COLOR_PBAR_BG)
 
     def display_sparkle(self):
         """Show random sparkles on LED"""
