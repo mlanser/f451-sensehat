@@ -325,8 +325,10 @@ class SenseHat:
         """
         if any(args):
             self.display_off()
+            print('OFF')
         else:
             self.display_on()
+            print('ON')
 
     def joystick_init(self, **kwargs):
         """Initialize Sense HAT joystick
@@ -378,26 +380,28 @@ class SenseHat:
         if self.displSleepMode:
             self.display_on()
 
+    # fmt: off
     def display_on(self):
         """Turn 'on' LED display"""
         self._SENSE.low_light = True
-        self.displSleepMode = False  # Reset 'sleep mode' flag
+        self.displSleepMode = False     # Reset 'sleep mode' flag
 
     def display_off(self):
         """Turn 'off' LED display"""
-        self.display_blank()
-        self.displSleepMode = True  # Set 'sleep mode' flag
+        self._SENSE.clear()             # Clear 8x8 LED
+        self.displSleepMode = True      # Set 'sleep mode' flag
 
     def display_blank(self):
         """Show clear/blank LED"""
         # Skip this if we're in 'sleep' mode
         if not self.displSleepMode:
-            self._SENSE.clear()  # Clear 8x8 LED
+            self._SENSE.clear()         # Clear 8x8 LED
 
     def display_reset(self):
         """Reset and clear LED"""
         self._SENSE.low_light = False
-        self._SENSE.clear()  # Clear 8x8 LED
+        self._SENSE.clear()             # Clear 8x8 LED
+    # fmt: on
 
     def display_as_graph(self, data, minMax=None):
         """Display graph and data point as text label
@@ -565,6 +569,7 @@ class SenseHat:
         # Skip this if we're in 'sleep' mode
         if not self.displSleepMode:
             self._SENSE.show_message(msg, text_colour = RGB_RED, back_colour = RGB_GREY)
+            self._SENSE.clear()  # Clear 8x8 LED
 
     def debug_joystick(self, direction=''):
         if direction == 'up':
