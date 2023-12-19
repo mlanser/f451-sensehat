@@ -326,7 +326,7 @@ class SenseHat:
         if any(args) and not self.displSleepMode:
             self.display_off()
             print('OFF')
-        elif not all(args) and self.displSleepMode:
+        elif not any(args) and self.displSleepMode:
             self.display_on()
             print('ON')
 
