@@ -158,22 +158,32 @@ class SenseHat:
         PROGRESS:   Show progress bar - [0 = no, 1 = yes]
         SLEEP:      Number of seconds until LED goes to screen saver mode
 
-    Methods:
+    Methods & Properties:
+        widthLED:           Width (cols) of LED display
+        heightLED:          Height (rows) of LED display
+        is_fake:            Return 'False' if physical Sense HAT
         get_CPU_temp:       Get CPU temp which we then can use to compensate temp reads
-        get_lux:            Get illumination value from sensor
+        get_lux:            Dummy - for compatibility
         get_pressure:       Get barometric pressure from sensor
         get_humidity:       Get humidity from sensor
         get_temperature:    Get temperature from sensor
+        update_display_mode: Switch display mode
+        update_sleep_mode:  Switch to/from sleep mode
+        joystick_init:      Initialize joystick actions
         display_init:       Initialize display so we can draw on it
+        display_rotate:     Rotate display +/- 90 degrees
         display_on:         Turn 'on' LED
         display_off:        Turn 'off' LED
         display_blank:      Erase LED
-        display_reset:      Erase LED
+        display_reset:      Erase LED and reset 'low_light' flag
         display_sparkle:    Show random sparkles on LED
         display_as_graph:   Display data as graph
         display_as_text:    Dummy - for compatibility
-        display_message:    Display text message
+        display_message:    Display text message - wrapper for 'display_8x8_message
         display_progress:   Display progress bar
+        display_8x8_image:  Display 8x8 image on LED
+        display_8x8_message: Display scrolling text on LED
+        debug_joystick:     Fake joystick actions for debugging
     """
 
     def __init__(self, *args, **kwargs):
@@ -272,6 +282,14 @@ class SenseHat:
             else:
                 raise
 
+    def get_lux(self, *args):
+        """Get illumination data
+
+        NOTE: For compatibility only! We cannot get
+              this data from Sense HAT (yet).
+        """
+        return None
+
     def get_pressure(self):
         """Get air pressure data from Sense HAT sensor"""
         return self._SENSE.get_pressure()
@@ -325,10 +343,8 @@ class SenseHat:
         """
         if any(args) and not self.displSleepMode:
             self.display_off()
-            print('OFF')
         elif not any(args) and self.displSleepMode:
             self.display_on()
-            print('ON')
 
     def joystick_init(self, **kwargs):
         """Initialize Sense HAT joystick
@@ -492,15 +508,17 @@ class SenseHat:
         """
         pass
 
-    def display_message(self, msg):
+    def display_message(self, msg, fgCol = None, bgCol = None):
         """Display text message
 
-        This method will redraw the entire LED
+        This method wraps the 'display_8x8_message' method.
 
         Args:
             msg: 'str' with text to display
+            fgCol: 'tuple' with (R, G, B) for text color
+            bgCol: 'tuple' with (R, G, B) for background color
         """
-        self.display_8x8_message(msg)
+        self.display_8x8_message(msg, fgCol, bgCol)
 
     def display_progress(self, inFrctn=0.0):
         """Update progressbar on LED
@@ -564,14 +582,23 @@ class SenseHat:
         if not self.displSleepMode:
             self._SENSE.set_pixels(image)
 
-    def display_8x8_message(self, msg):
-        """Display scrolling message"""
+    def display_8x8_message(self, msg, fgCol = None, bgCol = None):
+        """Display scrolling message
+        
+        Args:
+            msg: text string to display
+            fgCol: 'tuple' with (R, G, B) for text color
+            bgCol: 'tuple' with (R, G, B) for background color
+        """
         # Skip this if we're in 'sleep' mode
         if not self.displSleepMode:
-            self._SENSE.show_message(msg, text_colour = RGB_RED, back_colour = RGB_GREY)
+            fg = RGB_RED if fgCol is None else fgCol
+            bg = RGB_GREY if bgCol is None else bgCol
+            self._SENSE.show_message(msg, text_colour = fg, back_colour = bg)
             self._SENSE.clear()  # Clear 8x8 LED
 
     def debug_joystick(self, direction=''):
+        """Assign to joystick events to confirm actions"""
         if direction == 'up':
             self._SENSE.show_letter('U')
         elif direction == 'down':
