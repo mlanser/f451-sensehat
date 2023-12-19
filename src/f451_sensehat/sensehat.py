@@ -536,7 +536,7 @@ class SenseHat:
 
         # Calculate X value. We ensure that we do not go over max width
         # of LED by limiting any input value to a range of 0.0 - 1.0
-        col = int(max(min(float(inFrctn), 1.0), 0.0)) * DISPL_MAX_COL
+        col = int(max(min(float(inFrctn), 1.0), 0.0) * DISPL_MAX_COL)
 
         # If we're starting over (i.e. 'col' is 0), then we need to blank
         # out entire row
