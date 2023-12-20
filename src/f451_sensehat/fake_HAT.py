@@ -70,5 +70,8 @@ class FakeSenseHat:
     def get_humidity(self):
         return random.randint(int(HUMID_MIN * 10), int(HUMID_MAX * 10)) / 10
     
-    def show_letter(self, *args):
+    def show_letter(self, *args, **kwargs):
+        pass
+
+    def show_message(self, *args, **kwargs):
         pass
