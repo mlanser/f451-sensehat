@@ -513,6 +513,7 @@ class SenseHat:
         # Get colors based on limits and color map? Or generate based on
         # value itself?
         if all(data.limits):
+            assert False
             pixels = [
                 _get_color_from_map(v, minMax, row, yMax, data.limits, colorMap)
                 for row in range(yMax)
