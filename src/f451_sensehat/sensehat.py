@@ -474,7 +474,7 @@ class SenseHat:
             # Should the pixel on this row be black?
             scaledVal = int(_clamp(_scale(val, minMax), 0, DISPL_MAX_ROW))
 
-            assert False 
+            # assert False 
             if curRow < (maxRow - int(scaledVal * maxRow)):
                 return RGB_BLACK
 
