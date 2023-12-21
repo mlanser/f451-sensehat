@@ -15,7 +15,6 @@ Dependencies:
 """
 
 import colorsys
-from curses import COLOR_BLACK
 
 from random import randint
 from subprocess import PIPE, Popen
