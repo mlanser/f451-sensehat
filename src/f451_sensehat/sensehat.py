@@ -340,7 +340,7 @@ class SenseHat:
         on whether one or more args are 'True'
 
         Args:
-            args: list of one or more flags. If any flag is 'True' 
+            args: list of one or more flags. If any flag is 'True'
             then we 'go to sleep' and turn off display
         """
         if any(args) and not self.displSleepMode:
@@ -442,7 +442,7 @@ class SenseHat:
                     limits = [list of limits]
             minMax:
                 'tuple' with min/max values. If 'None' then calculate locally.
-            colorMap: 
+            colorMap:
                 'list' (optional) custom color map to use if data has defined 'limits'
         """
 
@@ -453,6 +453,14 @@ class SenseHat:
         def _clamp(val, minVal=0, maxVal=1):
             return min(max(float(minVal), float(val)), float(maxVal))
 
+        def _scale(val, minMax):
+            """Scale value to fit on SenseHAT LED
+
+            This is similar to 'num_to_range()' in f451 Labs Common module,
+            but simplified for fitting values to SenseHAT LED display dimensions.
+            """
+            return float(val - minMax[0]) / float(minMax[1] - minMax[0]) * DISPL_MAX_ROW
+
         def _get_rgb(val, curRow, maxRow):
             # Should the pixel on this row be black?
             if curRow < (maxRow - int(val * maxRow)):
@@ -462,9 +470,10 @@ class SenseHat:
             color = (1.0 - val) * 0.6
             return tuple(int(x * 255.0) for x in colorsys.hsv_to_rgb(color, 1.0, 1.0))
 
-        def _get_color_from_map(val, curRow, maxRow, limits, colorMap):
+        def _get_color_from_map(val, minMax, curRow, maxRow, limits, colorMap):
             # Should the pixel on this row be black?
-            if curRow < (maxRow - int(val * maxRow)):
+            scaledVal = _clamp(_scale(val, minMax), 0, DISPL_MAX_ROW)
+            if curRow < (maxRow - int(scaledVal * maxRow)):
                 return RGB_BLACK
 
             # Map value against color map
@@ -481,9 +490,9 @@ class SenseHat:
         if self.displSleepMode:
             return
 
-        # Create a list with 'DISPL_MAX_COL' num values. We add 0 (zero) to 
-        # the beginning of the list if whole set has less than 'DISPL_MAX_COL' 
-        # num values. This allows us to simulate 'scrolling' right to left. We 
+        # Create a list with 'DISPL_MAX_COL' num values. We add 0 (zero) to
+        # the beginning of the list if whole set has less than 'DISPL_MAX_COL'
+        # num values. This allows us to simulate 'scrolling' right to left. We
         # grab last 'n' values that can fit LED and scrub any 'None' values. If
         # there are not enough values to to fill display, we add 0's
         subSet = _scrub(data.data[-DISPL_MAX_COL:])
@@ -505,20 +514,23 @@ class SenseHat:
         # value itself?
         if all(data.limits):
             pixels = [
-                _get_color_from_map(v, row, yMax, data.limits, colorMap) for row in range(yMax) for v in values
+                _get_color_from_map(v, minMax, row, yMax, data.limits, colorMap)
+                for row in range(yMax)
+                for v in values
             ]
         else:
             # Scale incoming values in the data set to be between 0 and 1. We may need
-            # to clamp values when outside min/max values are outside min/max for current 
+            # to clamp values when outside min/max values are outside min/max for current
             # sub-set. This can happen when original data set has more values than the
             # chunk (8 values) that we display on the Sense HAT 8x8 LED.
             colors = [_clamp((v - vmin + 1) / (vmax - vmin + 1)) for v in values]
-
             pixels = [
-                _get_rgb(colors[col], row, yMax) for row in range(yMax) for col in range(DISPL_MAX_COL)
+                _get_rgb(colors[col], row, yMax)
+                for row in range(yMax)
+                for col in range(DISPL_MAX_COL)
             ]
 
-        # If there's a progress bar on bottom (8th) row, lets copy the existing 
+        # If there's a progress bar on bottom (8th) row, lets copy the existing
         # pixels, and then append them to the new (7 row) pixel list
         if self.displProgress:
             currPixels = self._SENSE.get_pixels()
@@ -530,12 +542,12 @@ class SenseHat:
         """Display data points as text in columns
 
         NOTE: For compatibility only! We cannot display
-              this text info in a meaningful manner on 
+              this text info in a meaningful manner on
               the Sense HAT 8x8 LED display.
         """
         pass
 
-    def display_message(self, msg, fgCol = None, bgCol = None):
+    def display_message(self, msg, fgCol=None, bgCol=None):
         """Display text message
 
         This method wraps the 'display_8x8_message' method.
@@ -574,6 +586,7 @@ class SenseHat:
 
     def display_sparkle(self):
         """Show random sparkles on LED"""
+
         def _sparkle():
             x = randint(0, DISPL_MAX_COL - 1)
             y = randint(0, yMax - 1)
@@ -596,11 +609,13 @@ class SenseHat:
             x, y, rgb = _sparkle()
             self._SENSE.set_pixel(x, y, rgb)
         else:
-            # If we have a progress bar, we'll create a blank top 
+            # If we have a progress bar, we'll create a blank top
             # and add back in the last row with the progress bar
             if self.displProgress:
                 currPixels = self._SENSE.get_pixels()
-                pixels = [RGB_BLACK for _ in range(DISPL_MAX_COL * yMax)] + currPixels[-DISPL_MAX_COL:]
+                pixels = [RGB_BLACK for _ in range(DISPL_MAX_COL * yMax)] + currPixels[
+                    -DISPL_MAX_COL:
+                ]
                 self._SENSE.set_pixels(pixels)
             else:
                 self._SENSE.clear()
@@ -621,9 +636,9 @@ class SenseHat:
         if not self.displSleepMode:
             self._SENSE.set_pixels(image)
 
-    def display_8x8_message(self, msg, fgCol = None, bgCol = None):
+    def display_8x8_message(self, msg, fgCol=None, bgCol=None):
         """Display scrolling message
-        
+
         Args:
             msg: text string to display
             fgCol: 'tuple' with (R, G, B) for text color
@@ -633,7 +648,7 @@ class SenseHat:
         if not self.displSleepMode:
             fg = RGB_RED if fgCol is None else fgCol
             bg = RGB_GREY if bgCol is None else bgCol
-            self._SENSE.show_message(msg, text_colour = fg, back_colour = bg)
+            self._SENSE.show_message(msg, text_colour=fg, back_colour=bg)
             self._SENSE.clear()  # Clear 8x8 LED
 
     def debug_joystick(self, direction=''):
