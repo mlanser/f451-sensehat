@@ -46,7 +46,19 @@ class FakeSenseHat:
         self.stick = Stick()
         self.fake = True
 
-    def clear(self):
+    def clear(self, *args, **kwargs):
+        pass
+
+    def flip_h(self, *args, **kwargs):
+        pass
+
+    def flip_v(self, *args, **kwargs):
+        pass
+    
+    def get_pixel(self, *args):
+        pass
+
+    def get_pixels(self, *args):
         pass
 
     def set_pixel(self, *args):
@@ -74,4 +86,7 @@ class FakeSenseHat:
         pass
 
     def show_message(self, *args, **kwargs):
+        pass
+
+    def load_image(self, *args, **kwargs):
         pass

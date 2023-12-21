@@ -94,8 +94,8 @@ COLOR_TXT = RGB_CHROME          # Default text on background
 COLOR_PBAR_FG = RGB_CYAN        # Default prog bar color
 COLOR_PBAR_BG = RGB_GREY_BLUE   # Default prog bar background
 
-ROTATE_90 = 90          # Rotate 90 degrees
-STEP_1 = 1              # Display mode step
+ROTATE_90 = 90                  # Rotate 90 degrees
+STEP_1 = 1                      # Display mode step
 
 BTN_RELEASE = ACTION_RELEASED
 
@@ -451,6 +451,7 @@ class SenseHat:
             return [0 if i is None else i for i in data]
 
         def _clamp(val, minVal=0, maxVal=1):
+            """Clamp values to min/max range"""
             return min(max(float(minVal), float(val)), float(maxVal))
 
         def _scale(val, minMax):
@@ -462,6 +463,11 @@ class SenseHat:
             return float(val - minMax[0]) / float(minMax[1] - minMax[0]) * DISPL_MAX_ROW
 
         def _get_rgb(val, curRow, maxRow):
+            """Get a color value using 'colorsys' library
+            
+            We use this method if there is no color map and/or 
+            no limits are defined for a give data set.
+            """
             # Should the pixel on this row be black?
             if curRow < (maxRow - int(val * maxRow)):
                 return RGB_BLACK
@@ -473,12 +479,12 @@ class SenseHat:
         def _get_color_from_map(val, minMax, curRow, maxRow, limits, colorMap):
             # Should the pixel on this row be black?
             scaledVal = int(_clamp(_scale(val, minMax), 0, DISPL_MAX_ROW))
-
-            # assert False 
             if curRow < (maxRow - scaledVal):
                 return RGB_BLACK
 
-            # Map value against color map
+            # Map value against color map. Not taht we're mapping original 
+            # value against the color map as the color map limits use
+            # actual full-scale values.
             if val > round(limits[2], 1):
                 color = colorMap.high
             elif val <= round(limits[1], 1):
@@ -513,7 +519,7 @@ class SenseHat:
         vmax = max(values) if minMax is None else minMax[1]
 
         # Get colors based on limits and color map? Or generate based on
-        # value itself?
+        # value itself compared to defined limits?
         if all(data.limits):
             pixels = [
                 _get_color_from_map(v, minMax, row, yMax, data.limits, colorMap)
@@ -521,13 +527,13 @@ class SenseHat:
                 for v in values
             ]
         else:
-            # Scale incoming values in the data set to be between 0 and 1. We may need
-            # to clamp values when outside min/max values are outside min/max for current
-            # sub-set. This can happen when original data set has more values than the
-            # chunk (8 values) that we display on the Sense HAT 8x8 LED.
-            colors = [_clamp((v - vmin + 1) / (vmax - vmin + 1)) for v in values]
+            # Scale incoming values to be between 0 and 1. We may need to clamp 
+            # values when outside min/max values are outside min/max for current
+            # sub-set. This can happen when original data set has more values than 
+            # the chunk (8 values) that we display on the Sense HAT 8x8 LED.
+            scaled = [_clamp((v - vmin + 1) / (vmax - vmin + 1)) for v in values]
             pixels = [
-                _get_rgb(colors[col], row, yMax)
+                _get_rgb(scaled[col], row, yMax)
                 for row in range(yMax)
                 for col in range(DISPL_MAX_COL)
             ]
@@ -538,6 +544,7 @@ class SenseHat:
             currPixels = self._SENSE.get_pixels()
             pixels += currPixels[-DISPL_MAX_COL:]
 
+        # Display all pixels for entire Sense HAT LED all at once
         self._SENSE.set_pixels(pixels)
 
     def display_as_text(self, *args):
@@ -587,7 +594,11 @@ class SenseHat:
             self._SENSE.set_pixel(x, DISPL_MAX_ROW - 1, COLOR_PBAR_BG)
 
     def display_sparkle(self):
-        """Show random sparkles on LED"""
+        """Show random sparkles on LED
+        
+        This is essenmtially a screen saver to show the app
+        is still running on the device.
+        """
 
         def _sparkle():
             x = randint(0, DISPL_MAX_COL - 1)

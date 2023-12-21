@@ -200,7 +200,7 @@ class SenseData:
             deque([defVal] * maxLen, maxlen=maxLen),
             (None, None),   # Sense HAT color/brightness sensor (TCS3400)
             'Lux',
-            [-1, -1, 30000, 100000],
+            [0, 0, 30000, 100000],
             'Light',
         )
 
