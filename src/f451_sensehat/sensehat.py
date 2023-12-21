@@ -475,7 +475,7 @@ class SenseHat:
             scaledVal = int(_clamp(_scale(val, minMax), 0, DISPL_MAX_ROW))
 
             # assert False 
-            if curRow < (maxRow - int(scaledVal * maxRow)):
+            if curRow < (maxRow - scaledVal):
                 return RGB_BLACK
 
             # Map value against color map
