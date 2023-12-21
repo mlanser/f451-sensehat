@@ -520,6 +520,7 @@ class SenseHat:
                 for v in values
             ]
         else:
+            assert False
             # Scale incoming values in the data set to be between 0 and 1. We may need
             # to clamp values when outside min/max values are outside min/max for current
             # sub-set. This can happen when original data set has more values than the
