@@ -422,7 +422,7 @@ class SenseHat:
         self._SENSE.clear()             # Clear 8x8 LED
     # fmt: on
 
-    def display_as_graph(self, data, minMax=None):
+    def display_as_graph(self, data, minMax=None, colorMap=None):
         """Display graph and data point as text label
 
         This method will redraw the entire 8x8 LED all at once. That means
@@ -443,6 +443,8 @@ class SenseHat:
                     limits = [list of limits]
             minMax:
                 'tuple' with min/max values. If 'None' then calculate locally.
+            colorMap: 
+                'list' (optional) custom color map to use if data has defined 'limits'
         """
 
         def _scrub(data):
@@ -460,6 +462,21 @@ class SenseHat:
             # Convert the values to colors from red to blue
             color = (1.0 - val) * 0.6
             return tuple(int(x * 255.0) for x in colorsys.hsv_to_rgb(color, 1.0, 1.0))
+
+        def _get_color_from_map(val, curRow, maxRow, limits, colorMap):
+            # Should the pixel on this row be black?
+            if curRow < (maxRow - int(val * maxRow)):
+                return RGB_BLACK
+
+            # Map value against color map
+            if val > round(limits[2], 1):
+                color = colorMap.high
+            elif val <= round(limits[1], 1):
+                color = colorMap.low
+            else:
+                color = colorMap.normal
+
+            return color
 
         # Skip this if we're in 'sleep' mode
         if self.displSleepMode:
@@ -480,19 +497,27 @@ class SenseHat:
             else [0 for _ in range(DISPL_MAX_COL - lenSet)] + subSet
         )
 
-        # Scale incoming values in the data set to be between 0 and 1. We may need
-        # to clamp values when outside min/max values are outside min/max for current 
-        # sub-set. This can happen when original data set has more values than the
-        # chunk (8 values) that we display on the Sense HAT 8x8 LED.
-        vmin = min(values) if minMax is None else minMax[0]
-        vmax = max(values) if minMax is None else minMax[1]
-        colors = [_clamp((v - vmin + 1) / (vmax - vmin + 1)) for v in values]
-
         # Reserve space for progress bar?
         yMax = DISPL_MAX_ROW - 1 if self.displProgress else DISPL_MAX_ROW
-        pixels = [
-            _get_rgb(colors[col], row, yMax) for row in range(yMax) for col in range(DISPL_MAX_COL)
-        ]
+
+        # Get colors based on limits and color map? Or generate based on
+        # value itself?
+        if all(data.limits):
+            pixels = [
+                _get_color_from_map(v, row, yMax, data.limits, colorMap) for row in range(yMax) for v in values
+            ]
+        else:
+            # Scale incoming values in the data set to be between 0 and 1. We may need
+            # to clamp values when outside min/max values are outside min/max for current 
+            # sub-set. This can happen when original data set has more values than the
+            # chunk (8 values) that we display on the Sense HAT 8x8 LED.
+            vmin = min(values) if minMax is None else minMax[0]
+            vmax = max(values) if minMax is None else minMax[1]
+            colors = [_clamp((v - vmin + 1) / (vmax - vmin + 1)) for v in values]
+
+            pixels = [
+                _get_rgb(colors[col], row, yMax) for row in range(yMax) for col in range(DISPL_MAX_COL)
+            ]
 
         # If there's a progress bar on bottom (8th) row, lets copy the existing 
         # pixels, and then append them to the new (7 row) pixel list
