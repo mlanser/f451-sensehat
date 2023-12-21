@@ -472,7 +472,8 @@ class SenseHat:
 
         def _get_color_from_map(val, minMax, curRow, maxRow, limits, colorMap):
             # Should the pixel on this row be black?
-            scaledVal = _clamp(_scale(val, minMax), 0, DISPL_MAX_ROW)
+            scaledVal = _scale(val, minMax)
+            clampedVal = _clamp(scaledVal, 0, DISPL_MAX_ROW)
 
             assert False 
             if curRow < (maxRow - int(scaledVal * maxRow)):
