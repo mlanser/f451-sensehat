@@ -498,6 +498,8 @@ class SenseHat:
 
         # Reserve space for progress bar?
         yMax = DISPL_MAX_ROW - 1 if self.displProgress else DISPL_MAX_ROW
+        vmin = min(values) if minMax is None else minMax[0]
+        vmax = max(values) if minMax is None else minMax[1]
 
         # Get colors based on limits and color map? Or generate based on
         # value itself?
@@ -510,8 +512,6 @@ class SenseHat:
             # to clamp values when outside min/max values are outside min/max for current 
             # sub-set. This can happen when original data set has more values than the
             # chunk (8 values) that we display on the Sense HAT 8x8 LED.
-            vmin = min(values) if minMax is None else minMax[0]
-            vmax = max(values) if minMax is None else minMax[1]
             colors = [_clamp((v - vmin + 1) / (vmax - vmin + 1)) for v in values]
 
             pixels = [
