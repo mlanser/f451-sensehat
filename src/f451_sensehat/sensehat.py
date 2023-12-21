@@ -473,6 +473,8 @@ class SenseHat:
         def _get_color_from_map(val, minMax, curRow, maxRow, limits, colorMap):
             # Should the pixel on this row be black?
             scaledVal = _clamp(_scale(val, minMax), 0, DISPL_MAX_ROW)
+
+            assert False 
             if curRow < (maxRow - int(scaledVal * maxRow)):
                 return RGB_BLACK
 
@@ -513,14 +515,12 @@ class SenseHat:
         # Get colors based on limits and color map? Or generate based on
         # value itself?
         if all(data.limits):
-            assert False
             pixels = [
                 _get_color_from_map(v, minMax, row, yMax, data.limits, colorMap)
                 for row in range(yMax)
                 for v in values
             ]
         else:
-            assert False
             # Scale incoming values in the data set to be between 0 and 1. We may need
             # to clamp values when outside min/max values are outside min/max for current
             # sub-set. This can happen when original data set has more values than the
