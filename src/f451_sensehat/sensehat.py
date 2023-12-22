@@ -395,7 +395,7 @@ class SenseHat:
         self._SENSE.set_rotation(self.displRotation)
 
         # Wake up display?
-        if self.displSleepMode:
+        if not self.is_fake() and self.displSleepMode:
             self.display_on()
 
     # fmt: off
@@ -412,7 +412,7 @@ class SenseHat:
     def display_blank(self):
         """Show clear/blank LED"""
         # Skip this if we're in 'sleep' mode
-        if not self.displSleepMode:
+        if not (self.is_fake() or self.displSleepMode):
             self._SENSE.clear()         # Clear 8x8 LED
 
     def display_reset(self):
@@ -495,7 +495,7 @@ class SenseHat:
             return color
 
         # Skip this if we're in 'sleep' mode
-        if self.displSleepMode:
+        if self.is_fake() or self.displSleepMode:
             return
 
         # Create a list with 'DISPL_MAX_COL' num values. We add 0 (zero) to
@@ -578,7 +578,7 @@ class SenseHat:
             inFrctn: 'float' representing fraction complete
         """
         # Skip this if we're in 'sleep' mode
-        if self.displSleepMode or not self.displProgress:
+        if self.is_fake() or self.displSleepMode or not self.displProgress:
             return
 
         # Calculate X value. We ensure that we do not go over max width
@@ -610,7 +610,7 @@ class SenseHat:
             return x, y, (r, g, b)
 
         # Skip this if we're in 'sleep' mode
-        if self.displSleepMode:
+        if self.is_fake() or self.displSleepMode:
             return
 
         # Reserve space for progress bar?
@@ -646,7 +646,7 @@ class SenseHat:
                 See demo for example.
         """
         # Skip this if we're in 'sleep' mode
-        if not self.displSleepMode:
+        if not (self.is_fake() or self.displSleepMode):
             self._SENSE.set_pixels(image)
 
     def display_8x8_message(self, msg, fgCol=None, bgCol=None):
@@ -658,7 +658,7 @@ class SenseHat:
             bgCol: 'tuple' with (R, G, B) for background color
         """
         # Skip this if we're in 'sleep' mode
-        if not self.displSleepMode:
+        if not (self.is_fake() or self.displSleepMode):
             fg = RGB_RED if fgCol is None else fgCol
             bg = RGB_GREY if bgCol is None else bgCol
             self._SENSE.show_message(msg, text_colour=fg, back_colour=bg)
