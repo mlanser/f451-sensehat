@@ -85,9 +85,9 @@ $ sh_demo [<options>]
 $ sh_demo -h 
 ```
 
-You can also also adjust the settings in the `sh_demo_settings.toml` file. For example, if you change the `PROGRESS` setting to 1, then the Sense HAT LED will display a progress bar indicvating when the next (simulated) upload will happen.
+You can also also adjust the settings in the `sh_demo_settings.toml` file. For example, if you change the `PROGRESS` setting to 1, then the Sense HAT LED will display a progress bar indicating when the next (simulated) upload will happen.
 
-Also, the joystick on the Sense HAT allows you to rotate the LED screen and switch between display modes. There is also a 'sleep mode' which turns off the display automatically after a certain amount of time. You can also turn on/off the LED display by pushing the joystick down. 
+Also, the joystick on the Sense HAT allows you to rotate the LED screen and switch between display modes. There is also a 'sleep mode' which turns off the display automatically after a certain amount of time. You can also turn on/off the LED display by pushing the joystick down.
 
 ```toml
 # File: sh_demo_settings.toml
