@@ -19,6 +19,8 @@ import colorsys
 from random import randint
 from subprocess import PIPE, Popen
 
+from . import sensehat_data as f451SenseData
+
 try:
     from sense_hat import SenseHat as RPISenseHat, ACTION_PRESSED, ACTION_HELD, ACTION_RELEASED
 except ImportError:
@@ -125,6 +127,87 @@ class SenseHatError(Exception):
     """Custom exception class"""
 
     pass
+
+
+def prep_data(inData, lenSlice=0):
+    """Prep data for Sense HAT
+
+    This function will filter data to ensure we don't have incorrect
+    outliers (e.g. from faulty sensors, etc.). The final data set will
+    have only valid values. Any invalid values will be replaced with
+    0's so that we can display the set on the Sense HAT LED.
+
+    This will technically affect the min/max values for the set. However,
+    we're displaying this data on an 8x8 LED. So visual 'accuracy' is
+    already less than ideal ;-)
+
+    NOTE: the data structure is more complex than we need for Sense HAT
+    devices. But we want to maintain a basic level of compatibility with
+    other f451 Labs modules.
+
+    Args:
+        inData: 'DataUnit' named tuple with 'raw' data from sensors
+        lenSlice: (optional) length of data slice
+
+    Returns:
+        'DataUnit' named tuple with the following fields:
+            data   = [list of values],
+            valid  = <tuple with min/max>,
+            unit   = <unit string>,
+            label  = <label string>,
+            limits = [list of limits]
+    """
+
+    def _is_valid(val, valid, allowNone=True):
+        """Verify value 'valid'
+
+        This method allows us to verify that a given
+        value falls within the 'valid' ranges are for 
+        a given data set. Any value outside the range 
+        is considered an error and is replaced by a 
+        default value.
+
+        NOTE: This local function is similar to the 'is_valid()' 
+              function in f451 Labs Common library. We have a copy
+              here so that the f451 Labs SenseHat library does not 
+              have another dependency
+
+        Args:
+            val: value to check
+            valid: 'tuple' with min/max values for valid range
+            allowNone: if 'True', then skip compare if 'valid' is 'None
+
+        Returns:
+            'True' if value is valid, else 'False'
+        """
+        if valid is None or not all(valid):
+            return allowNone
+
+        if val is not None and any(valid):
+            isValid = True
+            if valid[0] is not None:
+                isValid &= float(val) >= float(valid[0])
+            if valid[1] is not None:
+                isValid &= float(val) <= float(valid[1])
+
+            return isValid
+
+        return False
+
+    # Size of data slice we want to send to Sense HAT. The 'f451 Labs SenseHat'
+    # library will ulimately only display the last 8 values anyway.
+    dataSlice = list(inData.data)[-lenSlice:]
+
+    # Return filtered data
+    dataClean = [i if _is_valid(i, inData.valid) else 0 for i in dataSlice]
+
+    return f451SenseData.DataUnit(
+        data=dataClean,
+        valid=inData.valid,
+        unit=inData.unit,
+        label=inData.label,
+        limits=inData.limits,
+    )
 
 
 # =========================================================

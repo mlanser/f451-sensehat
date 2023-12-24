@@ -70,12 +70,48 @@ myData.pressure.data.append(mySense.get_pressure())
 myData.humidity.data.append(mySense.get_humidity())
 ```
 
+### SenseHat Demo
+
+The **f451 Labs SenseHat** module includes a (fairly) comprehensive CLI UI demo which you can launch as follows:
+
+```bash
+$ python -m f451_sensehat.sh_demo [<options>]
+
+# If you have installed the 'f451 Labs SenseHat' module 
+# using the 'pip install'
+$ sh_demo [<options>]
+
+# Use CLI arg '-h' to see available options
+$ sh_demo -h 
+```
+
+You can also also adjust the settings in the `sh_demo_settings.toml` file. For example, if you change the `PROGRESS` setting to 1, then the Sense HAT LED will display a progress bar indicvating when the next (simulated) upload will happen.
+
+Also, the joystick on the Sense HAT allows you to rotate the LED screen and switch between display modes. There is also a 'sleep mode' which turns off the display automatically after a certain amount of time. You can also turn on/off the LED display by pushing the joystick down. 
+
+```toml
+# File: sh_demo_settings.toml
+...
+PROGRESS = 1    # [0|1] - 1 = show upload progress bar on LCD
+SLEEP = 600     # Delay in seconds until screen is blanked
+...
+```
+
+Finally you can exit the application using the `ctrl-c` command. If you use the `--uploads N` commandline argument, then the application will stop after *N* (simulated) uploads.
+
+```bash
+# Stop after 10 uploads
+$ sh_demo --uploads 10
+
+# Show 'progress bar' regardless of setting in 'toml' file
+$ sh_demo --progress
+```
+
 ## How to test
 
 The tests are written for [pytest](https://docs.pytest.org/en/7.1.x/contents.html) and we use markers to separate out tests that require the actual Sense HAT hardware. Some tests do not rely on the hardware to be prexent. However, those tests rely on the `pytest-mock` module to be present.
 
 ```bash
-
 # Run all tests (except marked 'skip')
 $ pytest
 

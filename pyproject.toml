@@ -35,6 +35,7 @@ Homepage = "https://github.com/mlanser/f451-sensehat"
 
 [project.scripts]
 f451_sensehat = "f451_sensehat.__main__:main"
+sh_demo = "f451_sensehat.sh_demo:main"
 
 [tool.bumpver]
 current_version = "1.3.0"
