@@ -29,9 +29,7 @@ import sys
 import asyncio
 import contextlib
 import platform
-import random
 
-from collections import namedtuple
 from datetime import datetime
 from pathlib import Path
 
@@ -134,6 +132,7 @@ class AppRT(f451Common.Runtime):
         self.uploadDelay = self.ioDelay
         self.maxUploads = int(cliArgs.uploads)
         self.numUploads = 0
+        self.loopWait = APP_WAIT_1SEC   # Wait time between main loop cycles
 
         # Initialize UI for terminal
         self.console = Console() # type: ignore
@@ -214,10 +213,16 @@ class AppRT(f451Common.Runtime):
         if cliUI:
             self.console.update_progress(prog, msg) # type: ignore        
 
-    def update_upload_status(self, cliUI, lastTime, lastStatus, nextTime, numUploads, maxUploads=0):
+    def update_upload_status(self, cliUI, lastTime, lastStatus):
         """Wrapper to help streamline code"""
         if cliUI:
-            self.console.update_upload_status(lastTime, lastStatus, nextTime, numUploads, maxUploads) # type: ignore
+            self.console.update_upload_status(      # type: ignore
+                lastTime, 
+                lastStatus, 
+                lastTime + self.uploadDelay, 
+                self.numUploads, 
+                self.maxUploads
+            )
 
     def update_data(self, cliUI, data):
         """Wrapper to help streamline code"""
@@ -227,7 +232,6 @@ class AppRT(f451Common.Runtime):
 
 # Define app runtime object and basic data unit
 appRT = AppRT(APP_NAME, APP_VERSION, APP_NAME_SHORT, APP_LOG, APP_SETTINGS)
-DataUnit = namedtuple("DataUnit", APP_DATA_TYPES)
 
 
 # =========================================================
@@ -266,15 +270,6 @@ async def upload_demo_data(*args, **kwargs):
     # deviceID = appRT.sensors['SenseHat'].get_ID(DEF_ID_PREFIX)
 
     await asyncio.gather(*sendQ)
-
-
-def get_random_demo_data(limits=None):
-    """Generate random data
-
-    Returns:
-        'namedtuple' 'DataUnit with random demo data
-    """
-    return DataUnit(number1=random.randint(1, 200), number2=random.randint(0, 100))
 
 
 def btn_up(event):
@@ -433,22 +428,61 @@ def init_cli_parser(appName, appVersion, setDefaults=True):
     # fmt: on
 
 
-def hurry_up_and_wait(app):
-    """Display wait messages and progress bars
+def collect_data(app, data, timeCurrent):
+    """Collect data from sensors.
     
-    This function comes into play if we have longer wait times 
-    between sensor reads, etc. For example, we may want to read 
-    temperature sensors every second. But we may want to wait a 
-    minute or more to run internet speed tests.
+    This is core of the application where we collect data from 
+    one or more sensors, and then upload the data as needed.
 
     Args:
-        app: hook to app runtime object
-    """
-    time.sleep(app.ioWait)
+        app: application runtime object with config, counters, etc.
+        data: main application data queue
+        timeCurrent: time stamp from when loop started
 
-    # Update Sense HAT prog bar as needed with time remaining
-    # until next data upload
-    app.sensors['SenseHat'].display_progress(app.timeSinceUpdate / app.uploadDelay)
+    Returns:
+        'bool' if 'True' then we're done with all loops and we can exit app
+    """
+    exitApp = False
+
+    # --- Get magic data ---
+    #
+    newData = app.sensors['FakeSensor'].get_demo_data()
+    #
+    # ----------------------
+
+    # Is it time to upload data?
+    if app.timeSinceUpdate >= app.uploadDelay:
+        try:
+            asyncio.run(
+                upload_demo_data(
+                    data=newData.number1,
+                    deviceID=f451Common.get_RPI_ID(f451Common.DEF_ID_PREFIX),
+                )
+            )
+
+        except KeyboardInterrupt:
+            exitApp = True
+
+        else:
+            # Reset 'uploadDelay' back to normal 'ioFreq' on successful upload
+            app.numUploads += 1
+            app.uploadDelay = app.ioFreq
+            exitApp = exitApp or app.ioUploadAndExit
+            app.logger.log_info(
+                f'Uploaded: Magic #: {round(newData.number1, app.ioRounding)}'
+            )
+
+        finally:
+            app.timeUpdate = timeCurrent
+            exitApp = (app.maxUploads > 0) and (app.numUploads >= app.maxUploads)
+
+    # Update data set and display to terminal as needed
+    data.number1.data.append(newData.number1)
+    data.number2.data.append(newData.number2)
+
+    update_SenseHat_LED(app.sensors['SenseHat'], data)
+
+    return exitApp
 
 
 def main_loop(app, data):
@@ -462,75 +496,44 @@ def main_loop(app, data):
         app: application runtime object with config, counters, etc.
         data: main application data queue
     """
-    exitNow = False
-    while not exitNow:
-        # fmt: off
-        timeCurrent = time.time()
-        app.timeSinceUpdate = timeCurrent - app.timeUpdate
-        app.sensors['SenseHat'].update_sleep_mode(
-            (timeCurrent - app.displayUpdate) > app.sensors['SenseHat'].displSleepTime, # Time to sleep?
-            # cliArgs.noLED,                                                            # Force no LED?
-            app.sensors['SenseHat'].displSleepMode                                      # Already asleep?
-        )
+    # Set 'wait' counter 'exit' flag and start the loop!
+    exitApp = False
+    waitForSensor = 0
 
-        # Update Sense HAT prog bar as needed
-        app.sensors['SenseHat'].display_progress(app.timeSinceUpdate / app.uploadDelay)
-
-        # --- Get magic data ---
-        #
-        newData = get_random_demo_data()
-        #
-        # ----------------------
-        # fmt: on
-
-        # Is it time to upload data?
-        if app.timeSinceUpdate >= app.uploadDelay:
-            try:
-                asyncio.run(
-                    upload_demo_data(
-                        data=newData.number1,
-                        deviceID=f451Common.get_RPI_ID(f451Common.DEF_ID_PREFIX),
-                    )
-                )
-
-            except KeyboardInterrupt:
-                exitNow = True
-
-            else:
-                # Reset 'uploadDelay' back to normal 'ioFreq' on successful upload
-                app.numUploads += 1
-                app.uploadDelay = app.ioFreq
-                exitNow = exitNow or app.ioUploadAndExit
-                app.logger.log_info(
-                    f'Uploaded: Magic #: {round(newData.number1, app.ioRounding)}'
-                )
-            finally:
-                app.timeUpdate = timeCurrent
-                exitNow = (app.maxUploads > 0) and (app.numUploads >= app.maxUploads)
-
-        # Update data set and display to terminal as needed
-        data.number1.data.append(newData.number1)
-        data.number2.data.append(newData.number2)
-
-        update_SenseHat_LED(app.sensors['SenseHat'], data)
-
-        # Are we done? And do we have to wait a bit before next sensor read?
-        if not exitNow:
-            # If we're not done and there's a substantial wait before we can
-            # read the sensors again (e.g. we only want to read sensors every
-            # few minutes for whatever reason), then lets display and update
-            # the progress bar as needed. Once the wait is done, we can go
-            # through this whole loop all over again ... phew!
-            hurry_up_and_wait(app)
+    while not exitApp:
+        try:
+            # fmt: off
+            timeCurrent = time.time()
+            app.timeSinceUpdate = timeCurrent - app.timeUpdate
+            app.sensors['SenseHat'].update_sleep_mode(
+                (timeCurrent - app.displayUpdate) > app.sensors['SenseHat'].displSleepTime, # Time to sleep?
+                # cliArgs.noLED,                                                            # Force no LED?
+                app.sensors['SenseHat'].displSleepMode                                      # Already asleep?
+            )
+            # fmt: on
 
             # Update Sense HAT prog bar as needed
             app.sensors['SenseHat'].display_progress(app.timeSinceUpdate / app.uploadDelay)
+
+            # Do we need to wait for next sensor read? Or can 
+            # we collect more 'specimen'? :-P
+            if waitForSensor <= 0:
+                exitApp = collect_data(app, data, timeCurrent)
+                waitForSensor = max(app.ioWait, APP_MIN_PROG_WAIT)
+
+        except KeyboardInterrupt:
+            exitApp = True
+
+        # Are we done?
+        if not exitApp:
+            time.sleep(app.loopWait)
+            waitForSensor -= app.loopWait
 
 
 # =========================================================
 #      M A I N   F U N C T I O N    /   A C T I O N S
 # =========================================================
-def main(cliArgs=None):
+def main(cliArgs=None):  # sourcery skip: extract-method
     """Main function.
 
     This function will goes through the setup and then runs the
@@ -565,15 +568,23 @@ def main(cliArgs=None):
     appData = f451DemoData.DemoData(None, APP_MAX_DATA)
     appRT.init_runtime(cliArgs, appData)
 
-    # Initialize device instance which includes all sensors
-    # and LED display on Sense HAT. Also initialize joystick
-    # events and set 'sleep' and 'display' modes.
-    appRT.add_sensor('SenseHat', f451SenseHat.SenseHat)
-    appRT.sensors['SenseHat'].joystick_init(**APP_JOYSTICK_ACTIONS)
-    appRT.sensors['SenseHat'].display_init(**APP_DISPLAY_MODES)
-    appRT.sensors['SenseHat'].update_sleep_mode(cliArgs.noLED)
-    appRT.sensors['SenseHat'].displProgress = cliArgs.progress
-    appRT.sensors['SenseHat'].display_message(APP_NAME)
+    try:
+        # Initialize device instance which includes all sensors
+        # and LED display on Sense HAT. Also initialize joystick
+        # events and set 'sleep' and 'display' modes.
+        appRT.add_sensor('SenseHat', f451SenseHat.SenseHat)
+        appRT.sensors['SenseHat'].joystick_init(**APP_JOYSTICK_ACTIONS)
+        appRT.sensors['SenseHat'].display_init(**APP_DISPLAY_MODES)
+        appRT.sensors['SenseHat'].update_sleep_mode(cliArgs.noLED)
+        appRT.sensors['SenseHat'].displProgress = cliArgs.progress
+        appRT.sensors['SenseHat'].display_message(APP_NAME)
+
+        # Add fake sensor
+        appRT.add_sensor('FakeSensor', f451Common.FakeSensor)
+
+    except KeyboardInterrupt:
+        print(f'{APP_NAME} (v{APP_VERSION}) - Session terminated by user')
+        sys.exit(0)
 
     # --- Main application loop ---
     #
