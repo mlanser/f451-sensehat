@@ -62,7 +62,7 @@ APP_VERSION = '1.0.0'
 APP_NAME = 'f451 Labs - SenseHat Demo'
 APP_NAME_SHORT = 'SH Demo'
 APP_LOG = 'f451-sensehat-demo.log'  # Individual logs for devices with multiple apps
-APP_SETTINGS = 'sh_demo_settings.toml' # Standard for all f451 Labs projects
+APP_SETTINGS = 'sh_demo_settings.toml' # Settings for demo
 
 APP_MIN_SENSOR_READ_WAIT = 1        # Min wait in sec between sensor reads
 APP_MIN_PROG_WAIT = 1               # Remaining min (loop) wait time to display prog bar
@@ -74,7 +74,7 @@ APP_DATA_TYPES = ['number1', 'number2']
 
 APP_DISPLAY_MODES = {
     f451SenseHat.KWD_DISPLAY_MIN: const.MIN_DISPL,
-    f451SenseHat.KWD_DISPLAY_MAX: 2,
+    f451SenseHat.KWD_DISPLAY_MAX: const.MAX_DISPL,
 }
 
 class AppRT(f451Common.Runtime):
@@ -202,32 +202,6 @@ class AppRT(f451Common.Runtime):
     def add_sensor(self, sensorName, sensorType):
         self.sensors[sensorName] = sensorType(self.config)
         return self.sensors[sensorName]
-
-    def update_action(self, cliUI, msg=None):
-        """Wrapper to help streamline code"""
-        if cliUI:
-            self.console.update_action(msg) # type: ignore
-
-    def update_progress(self, cliUI, prog=None, msg=None):
-        """Wrapper to help streamline code"""
-        if cliUI:
-            self.console.update_progress(prog, msg) # type: ignore        
-
-    def update_upload_status(self, cliUI, lastTime, lastStatus):
-        """Wrapper to help streamline code"""
-        if cliUI:
-            self.console.update_upload_status(      # type: ignore
-                lastTime, 
-                lastStatus, 
-                lastTime + self.uploadDelay, 
-                self.numUploads, 
-                self.maxUploads
-            )
-
-    def update_data(self, cliUI, data):
-        """Wrapper to help streamline code"""
-        if cliUI:
-            self.console.update_data(data) # type: ignore
 
 
 # Define app runtime object

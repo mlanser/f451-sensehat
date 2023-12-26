@@ -35,7 +35,8 @@ TEMP_UNIT_K = 'K'  # Kelvin
 #                     M A I N   C L A S S
 # =========================================================
 # Common graph data structure
-DataUnit = namedtuple("DataUnit", "data valid unit label limits")
+DataUnit = namedtuple('DataUnit', 'data valid unit label limits')
+
 
 class SenseObject:
     """Data structure for environment data object.
@@ -73,6 +74,7 @@ class SenseObject:
         """Return data object as 'namedtuple' 'DataUnit' with each attribute as key."""
         return DataUnit(**self.as_dict())
 
+
 class TemperatureObject(SenseObject):
     """Data structure for environment data object.
 
@@ -87,6 +89,7 @@ class TemperatureObject(SenseObject):
 
     Methods:
         as_dict: return data attributes as 'dict'
+        as_tuple: return data attributes as 'namedtuple' 'DataUnit'
     """
 
     def __init__(self, data, valid, unit, limits, label):
@@ -160,7 +163,8 @@ class SenseData:
         light:          illumination in Lux
 
     Methods:
-        as_list: returns a 'list' with data from each attribute as 'dict'
+        as_list: returns a 'list' with data from each attribute as 'list'
+        as_dict: returns a 'dict' with data from each attribute as 'dict'
         convert_C2F: static (wrapper) method. Converts Celsius to Fahrenheit
         convert_C2K: static (wrapper) method. Converts Celsius to Kelvin
     """
@@ -175,6 +179,7 @@ class SenseData:
         Returns:
             'dict' - holds entire data structure
         """
+        # fmt: off
         self.temperature = TemperatureObject(
             deque([defVal] * maxLen, maxlen=maxLen),
             (0, 65),        # Sense HAT temp sensor (STMicro LPS25HB) range 0-65°C (±2°C)
@@ -203,6 +208,7 @@ class SenseData:
             [0, 0, 30000, 100000],
             'Light',
         )
+        # fmt: on
 
     def as_list(self, tempUnit=TEMP_UNIT_C):
         return [

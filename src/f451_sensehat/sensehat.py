@@ -126,7 +126,8 @@ KWD_BTN_MDL = 'BTNMDL'
 class SenseHatError(Exception):
     """Custom exception class"""
 
-    pass
+    def __init__(self, errMsg='Unknown Sense HAT error'):
+        super().__init__(errMsg)
 
 
 def prep_data(inData, lenSlice=0):
@@ -244,10 +245,11 @@ class SenseHat:
         SLEEP:      Number of seconds until LED goes to screen saver mode
 
     Methods & Properties:
-        widthLED:           Width (cols) of LED display
-        heightLED:          Height (rows) of LED display
+        displayWidth:       Width (cols) of LED display
+        displayHeight:      Height (rows) of LED display
         is_fake:            Return 'False' if physical Sense HAT
         get_CPU_temp:       Get CPU temp which we then can use to compensate temp reads
+        get_proximity:      Dummy - for compatibility
         get_lux:            Dummy - for compatibility
         get_pressure:       Get barometric pressure from sensor
         get_humidity:       Get humidity from sensor
@@ -301,11 +303,11 @@ class SenseHat:
         self.displTopY = DISPL_TOP_Y
 
     @property
-    def widthLED(self):
+    def displayWidth(self):
         return DISPL_MAX_COL
 
     @property
-    def heightLED(self):
+    def displayHeight(self):
         return DISPL_MAX_ROW
 
     def _init_SENSE(self, **kwargs):
@@ -367,6 +369,14 @@ class SenseHat:
             else:
                 raise
 
+    def get_proximity(self, *args):
+        """Get proximity data
+
+        NOTE: For compatibility only! We cannot get
+              this data from Sense HAT (yet).
+        """
+        return None
+
     def get_lux(self, *args):
         """Get illumination data
 
@@ -390,8 +400,8 @@ class SenseHat:
     def update_display_mode(self, direction):
         """Change LED display mode
 
-        We're changing the LED display mode and we're also
-        waking up the display if needed.
+        Change the LED display mode and also wake
+        up the display if needed.
 
         Args:
             direction: pos/neg integer
@@ -423,8 +433,9 @@ class SenseHat:
         on whether one or more args are 'True'
 
         Args:
-            args: list of one or more flags. If any flag is 'True'
-            then we 'go to sleep' and turn off display
+            args: list of one or more flags. If any flag 
+                  is 'True' then we 'go to sleep' and turn 
+                  off display
         """
         if any(args) and not self.displSleepMode:
             self.display_off()
@@ -484,12 +495,14 @@ class SenseHat:
     # fmt: off
     def display_on(self):
         """Turn 'on' LED display"""
-        self._SENSE.low_light = True
+        if not self.is_fake():
+            self._SENSE.low_light = True
         self.displSleepMode = False     # Reset 'sleep mode' flag
 
     def display_off(self):
         """Turn 'off' LED display"""
-        self._SENSE.clear()             # Clear 8x8 LED
+        if not self.is_fake():
+            self._SENSE.clear()         # Clear 8x8 LED
         self.displSleepMode = True      # Set 'sleep mode' flag
 
     def display_blank(self):
@@ -500,8 +513,9 @@ class SenseHat:
 
     def display_reset(self):
         """Reset and clear LED"""
-        self._SENSE.low_light = False
-        self._SENSE.clear()             # Clear 8x8 LED
+        if not self.is_fake():
+            self._SENSE.low_light = False
+            self._SENSE.clear()         # Clear 8x8 LED
     # fmt: on
 
     def display_as_graph(self, data, minMax=None, colorMap=None):

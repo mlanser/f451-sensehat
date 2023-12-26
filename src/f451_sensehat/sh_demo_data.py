@@ -14,11 +14,6 @@ import f451_sensehat.sensehat_data as f451SenseData
 
 
 # =========================================================
-#              M I S C .   C O N S T A N T S
-# =========================================================
-
-
-# =========================================================
 #                     M A I N   C L A S S
 # =========================================================
 class DemoData:
@@ -28,7 +23,7 @@ class DemoData:
     with the 'SystemData' and 'SenseData' classes.
 
     Attributes:
-        number1: random number 
+        number1: random number
         number2: random number
 
     Methods:
@@ -65,7 +60,7 @@ class DemoData:
             self.number1.as_dict(),
             self.number2.as_dict(),
         ]
-    
+
     def as_dict(self):
         return {
             'number1': self.number1.as_dict(),
