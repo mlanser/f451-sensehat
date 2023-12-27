@@ -29,6 +29,7 @@ except ImportError:
 __all__ = [
     'SenseHat',
     'SenseHatError',
+    'prep_data',
     'BTN_RELEASE',
     'KWD_ROTATION',
     'KWD_DISPLAY',
@@ -480,6 +481,9 @@ class SenseHat:
         Args:
             direction: pos/neg integer
         """
+        if self.is_fake():
+            return
+
         if int(direction) < 0:
             self.displRotation = 270 if self.displRotation <= 0 else self.displRotation - ROTATE_90
         else:
@@ -489,7 +493,7 @@ class SenseHat:
         self._SENSE.set_rotation(self.displRotation)
 
         # Wake up display?
-        if not self.is_fake() and self.displSleepMode:
+        if self.displSleepMode:
             self.display_on()
 
     # fmt: off
@@ -551,32 +555,32 @@ class SenseHat:
             """Clamp values to min/max range"""
             return min(max(float(minVal), float(val)), float(maxVal))
 
-        def _scale(val, minMax):
+        def _scale(val, minMax, height):
             """Scale value to fit on SenseHAT LED
 
             This is similar to 'num_to_range()' in f451 Labs Common module,
             but simplified for fitting values to SenseHAT LED display dimensions.
             """
-            return float(val - minMax[0]) / float(minMax[1] - minMax[0]) * DISPL_MAX_ROW
+            return float(val - minMax[0]) / float(minMax[1] - minMax[0]) * height
 
-        def _get_rgb(val, curRow, maxRow):
+        def _get_rgb(val, curRow, height):
             """Get a color value using 'colorsys' library
             
             We use this method if there is no color map and/or 
             no limits are defined for a give data set.
             """
             # Should the pixel on this row be black?
-            if curRow < (maxRow - int(val * maxRow)):
+            if curRow < (height - int(val * height)):
                 return RGB_BLACK
 
             # Convert the values to colors from red to blue
             color = (1.0 - val) * 0.6
             return tuple(int(x * 255.0) for x in colorsys.hsv_to_rgb(color, 1.0, 1.0))
 
-        def _get_color_from_map(val, minMax, curRow, maxRow, limits, colorMap):
+        def _get_color_from_map(val, minMax, curRow, height, width, limits, colorMap):
             # Should the pixel on this row be black?
-            scaledVal = int(_clamp(_scale(val, minMax), 0, DISPL_MAX_ROW))
-            if curRow < (maxRow - scaledVal):
+            scaledVal = int(_clamp(_scale(val, minMax, height), 0, width))
+            if curRow < (height - scaledVal):
                 return RGB_BLACK
 
             # Map value against color map. Not taht we're mapping original 
@@ -595,23 +599,25 @@ class SenseHat:
         if self.is_fake() or self.displSleepMode:
             return
 
-        # Create a list with 'DISPL_MAX_COL' num values. We add 0 (zero) to
-        # the beginning of the list if whole set has less than 'DISPL_MAX_COL'
+        # Create a list with 'displayWidth' num values. We add 0 (zero) to
+        # the beginning of the list if whole set has less than 'displayWidth'
         # num values. This allows us to simulate 'scrolling' right to left. We
         # grab last 'n' values that can fit LED and scrub any 'None' values. If
         # there are not enough values to to fill display, we add 0's
-        subSet = _scrub(data.data[-DISPL_MAX_COL:])
-        lenSet = min(DISPL_MAX_COL, len(subSet))
+        displWidth = self.displayWidth
+        displHeight = self.displayHeight
+        subSet = _scrub(data.data[-displWidth:])
+        lenSet = min(displWidth, len(subSet))
 
         # Extend 'value' list as needed
         values = (
             subSet
-            if lenSet == DISPL_MAX_COL
-            else [0 for _ in range(DISPL_MAX_COL - lenSet)] + subSet
+            if lenSet == displWidth
+            else [0 for _ in range(displWidth - lenSet)] + subSet
         )
 
         # Reserve space for progress bar?
-        yMax = DISPL_MAX_ROW - 1 if self.displProgress else DISPL_MAX_ROW
+        yMax = displHeight - 1 if self.displProgress else displHeight
         vmin = min(values) if minMax is None else minMax[0]
         vmax = max(values) if minMax is None else minMax[1]
 
@@ -619,27 +625,27 @@ class SenseHat:
         # value itself compared to defined limits?
         if all(data.limits):
             pixels = [
-                _get_color_from_map(v, minMax, row, yMax, data.limits, colorMap)
+                _get_color_from_map(v, minMax, row, yMax, displWidth, data.limits, colorMap)
                 for row in range(yMax)
                 for v in values
             ]
         else:
             # Scale incoming values to be between 0 and 1. We may need to clamp 
-            # values when outside min/max values are outside min/max for current
-            # sub-set. This can happen when original data set has more values than 
-            # the chunk (8 values) that we display on the Sense HAT 8x8 LED.
+            # values when values are outside min/max for current sub-set. This 
+            # can happen when original data set has more values than the chunk 
+            # (8 values) that we display on the Sense HAT 8x8 LED.
             scaled = [_clamp((v - vmin + 1) / (vmax - vmin + 1)) for v in values]
             pixels = [
                 _get_rgb(scaled[col], row, yMax)
                 for row in range(yMax)
-                for col in range(DISPL_MAX_COL)
+                for col in range(displWidth)
             ]
 
         # If there's a progress bar on bottom (8th) row, lets copy the existing
         # pixels, and then append them to the new (7 row) pixel list
         if self.displProgress:
             currPixels = self._SENSE.get_pixels()
-            pixels += currPixels[-DISPL_MAX_COL:]
+            pixels += currPixels[-displWidth:]
 
         # Display all pixels for entire Sense HAT LED all at once
         self._SENSE.set_pixels(pixels)
