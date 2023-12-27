@@ -522,8 +522,8 @@ class SenseHat:
             self._SENSE.clear()         # Clear 8x8 LED
     # fmt: on
 
-    def display_as_graph(self, data, minMax=None, colorMap=None):
-        """Display graph and data point as text label
+    def display_as_graph(self, data, minMax=None, colorMap=None, default=0):
+        """Display graph
 
         This method will redraw the entire 8x8 LED all at once. That means
         we need to create a list of 64 RGB tuples, and then send the list
@@ -545,11 +545,13 @@ class SenseHat:
                 'tuple' with min/max values. If 'None' then calculate locally.
             colorMap:
                 'list' (optional) custom color map to use if data has defined 'limits'
+            default:
+                'float' (optional) default value to use when replacing 'None' values
         """
 
-        def _scrub(data):
-            """Scrub 'None' from data"""
-            return [0 if i is None else i for i in data]
+        def _scrub(data, default=0):
+            """Scrub 'None' values from data"""
+            return [default if i is None else i for i in data]
 
         def _clamp(val, minVal=0, maxVal=1):
             """Clamp values to min/max range"""
@@ -606,20 +608,20 @@ class SenseHat:
         # there are not enough values to to fill display, we add 0's
         displWidth = self.displayWidth
         displHeight = self.displayHeight
-        subSet = _scrub(data.data[-displWidth:])
+        subSet = _scrub(data.data[-displWidth:], default)
         lenSet = min(displWidth, len(subSet))
 
         # Extend 'value' list as needed
         values = (
             subSet
             if lenSet == displWidth
-            else [0 for _ in range(displWidth - lenSet)] + subSet
+            else [default for _ in range(displWidth - lenSet)] + subSet
         )
 
         # Reserve space for progress bar?
         yMax = displHeight - 1 if self.displProgress else displHeight
-        vmin = min(values) if minMax is None else minMax[0]
-        vmax = max(values) if minMax is None else minMax[1]
+        vMin = min(values) if minMax is None else minMax[0]
+        vMax = max(values) if minMax is None else minMax[1]
 
         # Get colors based on limits and color map? Or generate based on
         # value itself compared to defined limits?
@@ -634,7 +636,7 @@ class SenseHat:
             # values when values are outside min/max for current sub-set. This 
             # can happen when original data set has more values than the chunk 
             # (8 values) that we display on the Sense HAT 8x8 LED.
-            scaled = [_clamp((v - vmin + 1) / (vmax - vmin + 1)) for v in values]
+            scaled = [_clamp((v - vMin + 1) / (vMax - vMin + 1)) for v in values]
             pixels = [
                 _get_rgb(scaled[col], row, yMax)
                 for row in range(yMax)
