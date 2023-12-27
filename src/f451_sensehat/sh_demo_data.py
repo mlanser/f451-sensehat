@@ -42,17 +42,17 @@ class DemoData:
         """
         self.rndnum = f451SenseData.SenseObject(
             deque([defVal] * maxLen, maxlen=maxLen),
-            (1, 200),  # min/max range for valid data
+            (45, 155),  # min/max range for valid data
             'km/h',
-            [None, None, None, None],
-            'Demo Speed',
+            [55, 85, 115, 145],
+            'Speed',
         )
         self.rndpcnt = f451SenseData.SenseObject(
             deque([defVal] * maxLen, maxlen=maxLen),
             (0, 100),  # min/max range for valid data
             '%',
             [10, 30, 70, 90],
-            'Demo Pcnt',
+            'Pcnt',
         )
 
     def as_list(self):
