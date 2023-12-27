@@ -579,9 +579,10 @@ class SenseHat:
             color = (1.0 - val) * 0.6
             return tuple(int(x * 255.0) for x in colorsys.hsv_to_rgb(color, 1.0, 1.0))
 
-        def _get_rgb_from_map(val, minMax, curRow, height, width, limits, colorMap):
+        def _get_rgb_from_map(val, minMax, curRow, height, limits, colorMap):
+            """Get a color from color map based on limits"""
             # Should the pixel on this row be black?
-            scaledVal = int(_clamp(_scale(val, minMax, height), 0, width))
+            scaledVal = int(_clamp(_scale(val, minMax, height), 0, height))
             if curRow < (height - scaledVal):
                 return RGB_BLACK
 
@@ -620,14 +621,17 @@ class SenseHat:
 
         # Reserve space for progress bar?
         yMax = displHeight - 1 if self.displProgress else displHeight
-        vMin = min(values) if minMax is None else minMax[0]
-        vMax = max(values) if minMax is None else minMax[1]
+        if minMax is None or minMax[1] == minMax[0]:
+            vMin = min(values) if minMax is None else minMax[0]
+            vMax = max(values) if minMax is None else minMax[1]
+        else:
+            vMin, vMax = minMax
 
         # Get colors based on limits and color map? Or generate based on
         # value itself compared to defined limits?
         if all(data.limits):
             pixels = [
-                _get_rgb_from_map(v, minMax, row, yMax, displWidth, data.limits, colorMap)
+                _get_rgb_from_map(v, minMax, row, yMax, data.limits, colorMap)
                 for row in range(yMax)
                 for v in values
             ]
@@ -637,10 +641,15 @@ class SenseHat:
             # can happen when original data set has more values than the chunk 
             # (8 values) that we display on the Sense HAT 8x8 LED.
             scaled = [_clamp((v - vMin + 1) / (vMax - vMin + 1)) for v in values]
+            # pixels = [
+            #     _get_rgb(scaled[col], row, yMax)
+            #     for row in range(yMax)
+            #     for col in range(displWidth)
+            # ]
             pixels = [
-                _get_rgb(scaled[col], row, yMax)
+                _get_rgb(v, row, yMax)
                 for row in range(yMax)
-                for col in range(displWidth)
+                for v in scaled
             ]
 
         # If there's a progress bar on bottom (8th) row, lets copy the existing
