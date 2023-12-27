@@ -346,14 +346,14 @@ def update_SenseHat_LED(sense, data, colors=None):
 
     # Check display mode. Each mode corresponds to a data type
     if sense.displMode == 1:
-        minMax = _minMax(data.number1.as_tuple().data)
-        dataClean = f451SenseHat.prep_data(data.number1.as_tuple())
+        minMax = _minMax(data.rndnum.as_tuple().data)
+        dataClean = f451SenseHat.prep_data(data.rndnum.as_tuple())
         colorMap = _get_color_map(dataClean, colors)
         sense.display_as_graph(dataClean, minMax, colorMap)
 
     elif sense.displMode == 2:
-        minMax = _minMax(data.number2.as_tuple().data)
-        dataClean = f451SenseHat.prep_data(data.number2.as_tuple())
+        minMax = _minMax(data.rndpcnt.as_tuple().data)
+        dataClean = f451SenseHat.prep_data(data.rndpcnt.as_tuple())
         colorMap = _get_color_map(dataClean, colors)
         sense.display_as_graph(dataClean, minMax, colorMap)
 
@@ -421,7 +421,7 @@ def collect_data(app, data, timeCurrent):
 
     # --- Get magic data ---
     #
-    newData = app.sensors['FakeSensor'].get_demo_data()
+    newData = app.sensors['FakeSensor'].get_demo_data(5)
     #
     # ----------------------
 
@@ -430,7 +430,7 @@ def collect_data(app, data, timeCurrent):
         try:
             asyncio.run(
                 upload_demo_data(
-                    data=newData.number1,
+                    data=newData.rndnum,
                     deviceID=f451Common.get_RPI_ID(f451Common.DEF_ID_PREFIX),
                 )
             )
@@ -444,7 +444,7 @@ def collect_data(app, data, timeCurrent):
             app.uploadDelay = app.ioFreq
             exitApp = exitApp or app.ioUploadAndExit
             app.logger.log_info(
-                f'Uploaded: Magic #: {round(newData.number1, app.ioRounding)}'
+                f'Uploaded: Magic #: {round(newData.rndnum, app.ioRounding)}'
             )
 
         finally:
@@ -452,8 +452,8 @@ def collect_data(app, data, timeCurrent):
             exitApp = (app.maxUploads > 0) and (app.numUploads >= app.maxUploads)
 
     # Update data set and display to terminal as needed
-    data.number1.data.append(newData.number1)
-    data.number2.data.append(newData.number2)
+    data.rndnum.data.append(newData.rndnum)
+    data.rndpcnt.data.append(newData.rndpcnt)
 
     update_SenseHat_LED(app.sensors['SenseHat'], data)
 

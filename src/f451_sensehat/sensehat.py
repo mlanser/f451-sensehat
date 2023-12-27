@@ -577,7 +577,7 @@ class SenseHat:
             color = (1.0 - val) * 0.6
             return tuple(int(x * 255.0) for x in colorsys.hsv_to_rgb(color, 1.0, 1.0))
 
-        def _get_color_from_map(val, minMax, curRow, height, width, limits, colorMap):
+        def _get_rgb_from_map(val, minMax, curRow, height, width, limits, colorMap):
             # Should the pixel on this row be black?
             scaledVal = int(_clamp(_scale(val, minMax, height), 0, width))
             if curRow < (height - scaledVal):
@@ -625,7 +625,7 @@ class SenseHat:
         # value itself compared to defined limits?
         if all(data.limits):
             pixels = [
-                _get_color_from_map(v, minMax, row, yMax, displWidth, data.limits, colorMap)
+                _get_rgb_from_map(v, minMax, row, yMax, displWidth, data.limits, colorMap)
                 for row in range(yMax)
                 for v in values
             ]
