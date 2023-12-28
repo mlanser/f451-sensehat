@@ -80,9 +80,9 @@ def create_image():
 # =========================================================
 #                    D E M O   A P P
 # =========================================================
-def main():
+def main():  # sourcery skip: extract-method
     # Skip display demos if we're using fake HAT
-    if not SENSE_HAT.isFake():
+    if not SENSE_HAT.isFake:
         print('Initializing Sense HAT')
         SENSE_HAT.display_init()
 
