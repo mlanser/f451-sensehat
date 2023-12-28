@@ -82,7 +82,7 @@ def create_image():
 # =========================================================
 def main():
     # Skip display demos if we're using fake HAT
-    if not SENSE_HAT.is_fake():
+    if not SENSE_HAT.isFake():
         print('Initializing Sense HAT')
         SENSE_HAT.display_init()
 

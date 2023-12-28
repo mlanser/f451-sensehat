@@ -164,14 +164,14 @@ def prep_data(inData, lenSlice=0):
         """Verify value 'valid'
 
         This method allows us to verify that a given
-        value falls within the 'valid' ranges are for 
-        a given data set. Any value outside the range 
-        is considered an error and is replaced by a 
+        value falls within the 'valid' ranges are for
+        a given data set. Any value outside the range
+        is considered an error and is replaced by a
         default value.
 
-        NOTE: This local function is similar to the 'is_valid()' 
+        NOTE: This local function is similar to the 'is_valid()'
               function in f451 Labs Common library. We have a copy
-              here so that the f451 Labs SenseHat library does not 
+              here so that the f451 Labs SenseHat library does not
               have another dependency
 
         Args:
@@ -248,7 +248,7 @@ class SenseHat:
     Methods & Properties:
         displayWidth:       Width (cols) of LED display
         displayHeight:      Height (rows) of LED display
-        is_fake:            Return 'False' if physical Sense HAT
+        isFake:             'False' if physical Sense HAT
         get_CPU_temp:       Get CPU temp which we then can use to compensate temp reads
         get_proximity:      Dummy - for compatibility
         get_lux:            Dummy - for compatibility
@@ -311,6 +311,14 @@ class SenseHat:
     def displayHeight(self):
         return DISPL_MAX_ROW
 
+    @property
+    def isFake(self):
+        """Is this 'real' or 'fake' SeneSHAT?
+        
+        Returns 'True' if we use 'FakeSenseHat' library
+        """
+        return getattr(self._SENSE, 'fake', False)
+
     def _init_SENSE(self, **kwargs):
         """Initialize SenseHat
 
@@ -341,8 +349,70 @@ class SenseHat:
         """
         pass
 
-    def is_fake(self):
-        return getattr(self._SENSE, 'fake', False)
+    @staticmethod
+    def _scrub(data, default=0):
+        """Scrub 'None' values from data"""
+        return [default if i is None else i for i in data]
+
+    @staticmethod
+    def _clamp(val, minVal=0, maxVal=1):
+        """Clamp values to min/max range"""
+        return min(max(float(minVal), float(val)), float(maxVal))
+
+    @staticmethod
+    def _scale(val, minMax, height):
+        """Scale value to fit on SenseHAT LED
+
+        This is similar to 'num_to_range()' in f451 Labs Common module,
+        but simplified for fitting values to SenseHAT LED display dimensions.
+        """
+        return float(val - minMax[0]) / float(minMax[1] - minMax[0]) * height
+
+    @staticmethod
+    def _get_rgb(val, curRow, height):
+        """Get a color value using 'colorsys' library
+
+        We use this method if there is no color map and/or
+        no limits are defined for a give data set.
+        """
+        # Should the pixel on this row be black?
+        if curRow < (height - int(val * height)):
+            return RGB_BLACK
+
+        # Convert the values to colors from red to blue
+        color = (1.0 - val) * 0.6
+        return tuple(int(x * 255.0) for x in colorsys.hsv_to_rgb(color, 1.0, 1.0))
+
+    def _get_rgb_from_map(self, val, minMax, curRow, height, limits, colorMap):
+        """Get a color from color map based on limits
+        
+        This function maps a value against a color map. Note that 
+        we need to map an original value (as opposed to scaled value)
+        against the color map, as the color map limits use actual 
+        (full-scale) values.
+
+        Args:
+            val: value to map
+            minMax: 'tuple' with min/max values
+            curRow: 'int' with current row
+            height: 'int' height display
+            limits: 'list' with limits
+            colorMap: named 'tuple' with color map
+
+        Returns:
+            'tuple' with RGB as '(R, G, B)'
+        """
+        # Should the pixel on this row be black?
+        scaledVal = int(self._clamp(self._scale(val, minMax, height), 0, height))
+        if curRow < (height - scaledVal):
+            return RGB_BLACK
+
+        if val > round(limits[2], 1):
+            return colorMap.high
+        elif val <= round(limits[1], 1):
+            return colorMap.low
+        else:
+            return colorMap.normal
 
     def get_CPU_temp(self, strict=True):
         """Get CPU temp
@@ -434,8 +504,8 @@ class SenseHat:
         on whether one or more args are 'True'
 
         Args:
-            args: list of one or more flags. If any flag 
-                  is 'True' then we 'go to sleep' and turn 
+            args: list of one or more flags. If any flag
+                  is 'True' then we 'go to sleep' and turn
                   off display
         """
         if any(args) and not self.displSleepMode:
@@ -481,7 +551,7 @@ class SenseHat:
         Args:
             direction: pos/neg integer
         """
-        if self.is_fake():
+        if self.isFake:
             return
 
         if int(direction) < 0:
@@ -499,25 +569,25 @@ class SenseHat:
     # fmt: off
     def display_on(self):
         """Turn 'on' LED display"""
-        if not self.is_fake():
+        if not self.isFake:
             self._SENSE.low_light = True
         self.displSleepMode = False     # Reset 'sleep mode' flag
 
     def display_off(self):
         """Turn 'off' LED display"""
-        if not self.is_fake():
+        if not self.isFake:
             self._SENSE.clear()         # Clear 8x8 LED
         self.displSleepMode = True      # Set 'sleep mode' flag
 
     def display_blank(self):
         """Show clear/blank LED"""
         # Skip this if we're in 'sleep' mode
-        if not (self.is_fake() or self.displSleepMode):
+        if not (self.isFake or self.displSleepMode):
             self._SENSE.clear()         # Clear 8x8 LED
 
     def display_reset(self):
         """Reset and clear LED"""
-        if not self.is_fake():
+        if not self.isFake:
             self._SENSE.low_light = False
             self._SENSE.clear()         # Clear 8x8 LED
     # fmt: on
@@ -544,62 +614,13 @@ class SenseHat:
             minMax:
                 'tuple' with min/max values. If 'None' then calculate locally.
             colorMap:
-                'list' (optional) custom color map to use if data has defined 'limits'
+                'tuple' (optional) custom color map to use if data has defined 'limits'
             default:
                 'float' (optional) default value to use when replacing 'None' values
         """
 
-        def _scrub(data, default=0):
-            """Scrub 'None' values from data"""
-            return [default if i is None else i for i in data]
-
-        def _clamp(val, minVal=0, maxVal=1):
-            """Clamp values to min/max range"""
-            return min(max(float(minVal), float(val)), float(maxVal))
-
-        def _scale(val, minMax, height):
-            """Scale value to fit on SenseHAT LED
-
-            This is similar to 'num_to_range()' in f451 Labs Common module,
-            but simplified for fitting values to SenseHAT LED display dimensions.
-            """
-            return float(val - minMax[0]) / float(minMax[1] - minMax[0]) * height
-
-        def _get_rgb(val, curRow, height):
-            """Get a color value using 'colorsys' library
-            
-            We use this method if there is no color map and/or 
-            no limits are defined for a give data set.
-            """
-            # Should the pixel on this row be black?
-            if curRow < (height - int(val * height)):
-                return RGB_BLACK
-
-            # Convert the values to colors from red to blue
-            color = (1.0 - val) * 0.6
-            return tuple(int(x * 255.0) for x in colorsys.hsv_to_rgb(color, 1.0, 1.0))
-
-        def _get_rgb_from_map(val, minMax, curRow, height, limits, colorMap):
-            """Get a color from color map based on limits"""
-            # Should the pixel on this row be black?
-            scaledVal = int(_clamp(_scale(val, minMax, height), 0, height))
-            if curRow < (height - scaledVal):
-                return RGB_BLACK
-
-            # Map value against color map. Not taht we're mapping original 
-            # value against the color map as the color map limits use
-            # actual full-scale values.
-            if val > round(limits[2], 1):
-                color = colorMap.high
-            elif val <= round(limits[1], 1):
-                color = colorMap.low
-            else:
-                color = colorMap.normal
-
-            return color
-
         # Skip this if we're in 'sleep' mode
-        if self.is_fake() or self.displSleepMode:
+        if self.isFake or self.displSleepMode:
             return
 
         # Create a list with 'displayWidth' num values. We add 0 (zero) to
@@ -609,7 +630,7 @@ class SenseHat:
         # there are not enough values to to fill display, we add 0's
         displWidth = self.displayWidth
         displHeight = self.displayHeight
-        subSet = _scrub(data.data[-displWidth:], default)
+        subSet = self._scrub(data.data[-displWidth:], default)
         lenSet = min(displWidth, len(subSet))
 
         # Extend 'value' list as needed
@@ -631,26 +652,22 @@ class SenseHat:
         # value itself compared to defined limits?
         if all(data.limits):
             pixels = [
-                _get_rgb_from_map(v, minMax, row, yMax, data.limits, colorMap)
+                self._get_rgb_from_map(v, minMax, row, yMax, data.limits, colorMap)
                 for row in range(yMax)
                 for v in values
             ]
         else:
-            # Scale incoming values to be between 0 and 1. We may need to clamp 
-            # values when values are outside min/max for current sub-set. This 
-            # can happen when original data set has more values than the chunk 
+            # Scale incoming values to be between 0 and 1. We may need to clamp
+            # values when values are outside min/max for current sub-set. This
+            # can happen when original data set has more values than the chunk
             # (8 values) that we display on the Sense HAT 8x8 LED.
-            scaled = [_clamp((v - vMin + 1) / (vMax - vMin + 1)) for v in values]
+            scaled = [self._clamp((v - vMin + 1) / (vMax - vMin + 1)) for v in values]
             # pixels = [
             #     _get_rgb(scaled[col], row, yMax)
             #     for row in range(yMax)
             #     for col in range(displWidth)
             # ]
-            pixels = [
-                _get_rgb(v, row, yMax)
-                for row in range(yMax)
-                for v in scaled
-            ]
+            pixels = [self._get_rgb(v, row, yMax) for row in range(yMax) for v in scaled]
 
         # If there's a progress bar on bottom (8th) row, lets copy the existing
         # pixels, and then append them to the new (7 row) pixel list
@@ -692,7 +709,7 @@ class SenseHat:
             inFrctn: 'float' representing fraction complete
         """
         # Skip this if we're in 'sleep' mode
-        if self.is_fake() or self.displSleepMode or not self.displProgress:
+        if self.isFake or self.displSleepMode or not self.displProgress:
             return
 
         # Calculate X value. We ensure that we do not go over max width
@@ -709,7 +726,7 @@ class SenseHat:
 
     def display_sparkle(self):
         """Show random sparkles on LED
-        
+
         This is essenmtially a screen saver to show the app
         is still running on the device.
         """
@@ -724,7 +741,7 @@ class SenseHat:
             return x, y, (r, g, b)
 
         # Skip this if we're in 'sleep' mode
-        if self.is_fake() or self.displSleepMode:
+        if self.isFake or self.displSleepMode:
             return
 
         # Reserve space for progress bar?
@@ -738,14 +755,14 @@ class SenseHat:
         else:
             # If we have a progress bar, we'll create a blank top
             # and add back in the last row with the progress bar
+            # fmt: off
             if self.displProgress:
                 currPixels = self._SENSE.get_pixels()
-                pixels = [RGB_BLACK for _ in range(DISPL_MAX_COL * yMax)] + currPixels[
-                    -DISPL_MAX_COL:
-                ]
+                pixels = [RGB_BLACK for _ in range(DISPL_MAX_COL * yMax)] + currPixels[-DISPL_MAX_COL:]
                 self._SENSE.set_pixels(pixels)
             else:
                 self._SENSE.clear()
+            # fmt: on
 
     def display_8x8_image(self, image):
         """Display 8x8 image on LED
@@ -760,7 +777,7 @@ class SenseHat:
                 See demo for example.
         """
         # Skip this if we're in 'sleep' mode
-        if not (self.is_fake() or self.displSleepMode):
+        if not (self.isFake or self.displSleepMode):
             self._SENSE.set_pixels(image)
 
     def display_8x8_message(self, msg, fgCol=None, bgCol=None):
@@ -772,7 +789,7 @@ class SenseHat:
             bgCol: 'tuple' with (R, G, B) for background color
         """
         # Skip this if we're in 'sleep' mode
-        if not (self.is_fake() or self.displSleepMode):
+        if not (self.isFake or self.displSleepMode):
             fg = RGB_RED if fgCol is None else fgCol
             bg = RGB_GREY if bgCol is None else bgCol
             self._SENSE.show_message(msg, text_colour=fg, back_colour=bg)
