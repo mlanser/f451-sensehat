@@ -7,6 +7,9 @@ The class wraps -- and extends as needed -- the methods
 and functions supported by underlying libraries, and also
 keeps track of core counters, flags, etc.
 
+TODO:
+ - more/better tests
+
 Dependencies:
  - fonts: https://pypi.org/project/fonts/
  - font-roboto: https://pypi.org/project/font-roboto/
@@ -491,7 +494,7 @@ class SenseHat:
             )
 
         # Wake up display?
-        if not self.displSleepMode:
+        if self.displSleepMode:
             self.display_on()
 
         # Clear the display
