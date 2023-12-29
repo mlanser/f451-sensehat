@@ -625,6 +625,7 @@ class SenseHat:
             default:
                 'float' (optional) default value to use when replacing 'None' values
         """
+        print("AS_GRAPH")
 
         # Skip this if we're in 'sleep' mode
         if self.isFake or self.displSleepMode:
