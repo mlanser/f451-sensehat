@@ -298,7 +298,6 @@ def btn_left(event):
     if event.action != f451SenseHat.BTN_RELEASE:
         appRT.sensors['SenseHat'].update_display_mode(-1)
         appRT.displayUpdate = time.time()
-        print("Beep")
 
 
 def btn_right(event):
@@ -311,7 +310,6 @@ def btn_right(event):
     if event.action != f451SenseHat.BTN_RELEASE:
         appRT.sensors['SenseHat'].update_display_mode(1)
         appRT.displayUpdate = time.time()
-        print("Boop")
 
 
 def btn_middle(event):

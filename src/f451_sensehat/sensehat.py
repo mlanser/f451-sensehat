@@ -411,6 +411,7 @@ class SenseHat:
         """
         # Should the pixel on this row be black?
         scaledVal = int(self._clamp(self._scale(val, minMax, height), 0, height))
+        print(f"R:{curRow} - H:{height} - V:{scaledVal}")
         if curRow < (height - scaledVal):
             return RGB_BLACK
 
@@ -657,9 +658,8 @@ class SenseHat:
         # Get colors based on limits and color map? Or generate based on
         # value itself compared to defined limits?
         if all(data.limits):
-            assert False
             pixels = [
-                self._get_rgb_from_map(v, minMax, row, yMax, data.limits, colorMap)
+                self._get_rgb_from_map(v, (vMin, vMax), row, yMax, data.limits, colorMap)
                 for row in range(yMax)
                 for v in values
             ]
