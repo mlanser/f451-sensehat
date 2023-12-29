@@ -371,7 +371,7 @@ class SenseHat:
         """
         return (
             0
-            if minMax[0] == minMax[0]
+            if minMax[0] == minMax[1]
             else float(val - minMax[0]) / float(minMax[1] - minMax[0]) * height
         )
 
