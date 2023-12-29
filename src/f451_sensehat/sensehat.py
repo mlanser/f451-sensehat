@@ -659,9 +659,9 @@ class SenseHat:
         # value itself compared to defined limits?
         if all(data.limits):
             pixels = [
-                self._get_rgb_from_map(v, (vMin, vMax), row, yMax, data.limits, colorMap)
+                self._get_rgb_from_map(values[col], (vMin, vMax), row, yMax, data.limits, colorMap)
                 for row in range(yMax)
-                for v in values
+                for col in range(displWidth)
             ]
             print("all_limits")
         else:
