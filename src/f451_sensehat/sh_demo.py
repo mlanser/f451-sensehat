@@ -20,8 +20,12 @@ NOTE: This application requires a physical Raspberry Pi Sense HAT add-on.
 NOTE: This application depends on the 'f451-common' library
 
 TODO:
-    - add more 8x8 images
-    - add more demo data feeds
+ - add more 8x8 images
+ - add more demo data feeds
+ - add more/better tests
+
+Dependencies:
+ - rich - for basic console output
 """
 
 import time
@@ -36,7 +40,6 @@ from pathlib import Path
 from . import sh_constants as const
 from . import sh_demo_data as f451DemoData
 
-# import f451_common.cli_ui as f451CLIUI
 import f451_common.common as f451Common
 import f451_common.logger as f451Logger
 
@@ -89,6 +92,29 @@ class AppRT(f451Common.Runtime):
             Path(__file__).parent   # Find dir for this app
         )
         
+    def _init_log_settings(self, cliArgs):
+        """Helper for setting logger settings"""
+        if cliArgs.debug:
+            self.logLvl = f451Logger.LOG_DEBUG
+            self.debugMode = True
+        else:
+            self.logLvl = self.config.get(f451Logger.KWD_LOG_LEVEL, f451Logger.LOG_NOTSET)
+            self.debugMode = (self.logLvl == f451Logger.LOG_DEBUG)
+
+        self.logger.set_log_level(self.logLvl)
+
+        if cliArgs.log is not None:
+            self.logger.set_log_file(appRT.logLvl, cliArgs.log)
+
+    def _init_dmode_settings(self, cliArgs):
+        """Helper for setting display mode settings"""
+        if cliArgs.dmode >= 0:
+            dmode = min(
+                max(int(cliArgs.dmode), APP_DISPLAY_MODES[f451SenseHat.KWD_DISPLAY_MIN]), 
+                APP_DISPLAY_MODES[f451SenseHat.KWD_DISPLAY_MAX]
+            )
+            self.config.update({f451SenseHat.KWD_DISPLAY: dmode})
+
     def init_runtime(self, cliArgs, data):
         """Initialize the 'runtime' variable
         
@@ -112,18 +138,9 @@ class AppRT(f451Common.Runtime):
         self.ioRounding = self.config.get(const.KWD_ROUNDING, const.DEF_ROUNDING)
         self.ioUploadAndExit = False
 
-        # Update log file or level?
-        if cliArgs.debug:
-            self.logLvl = f451Logger.LOG_DEBUG
-            self.debugMode = True
-        else:
-            self.logLvl = self.config.get(f451Logger.KWD_LOG_LEVEL, f451Logger.LOG_NOTSET)
-            self.debugMode = (self.logLvl == f451Logger.LOG_DEBUG)
-
-        self.logger.set_log_level(self.logLvl)
-
-        if cliArgs.log is not None:
-            self.logger.set_log_file(appRT.logLvl, cliArgs.log)
+        # Update log file/level or display mode?
+        self._init_log_settings(cliArgs)
+        self._init_dmode_settings(cliArgs)
 
         # Initialize various counters, etc.
         self.timeSinceUpdate = float(0)

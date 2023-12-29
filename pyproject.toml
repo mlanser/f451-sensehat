@@ -15,7 +15,8 @@ classifiers = [
 ]
 keywords = ["sensehat", "f451"]
 dependencies = [
-    'tomli; python_version < "3.11"'
+    'tomli; python_version < "3.11"',
+    'rich'
 ]
 requires-python = ">=3.9"
 dynamic = ["version"]
