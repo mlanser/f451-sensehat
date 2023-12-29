@@ -317,7 +317,7 @@ class SenseHat:
     @property
     def isFake(self):
         """Is this 'real' or 'fake' SeneSHAT?
-        
+
         Returns 'True' if we use 'FakeSenseHat' library
         """
         return getattr(self._SENSE, 'fake', False)
@@ -369,7 +369,11 @@ class SenseHat:
         This is similar to 'num_to_range()' in f451 Labs Common module,
         but simplified for fitting values to SenseHAT LED display dimensions.
         """
-        return float(val - minMax[0]) / float(minMax[1] - minMax[0]) * height
+        return (
+            0
+            if minMax[0] == minMax[0]
+            else float(val - minMax[0]) / float(minMax[1] - minMax[0]) * height
+        )
 
     @staticmethod
     def _get_rgb(val, curRow, height):
@@ -388,10 +392,10 @@ class SenseHat:
 
     def _get_rgb_from_map(self, val, minMax, curRow, height, limits, colorMap):
         """Get a color from color map based on limits
-        
-        This function maps a value against a color map. Note that 
+
+        This function maps a value against a color map. Note that
         we need to map an original value (as opposed to scaled value)
-        against the color map, as the color map limits use actual 
+        against the color map, as the color map limits use actual
         (full-scale) values.
 
         Args:
