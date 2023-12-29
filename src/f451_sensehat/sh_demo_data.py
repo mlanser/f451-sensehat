@@ -23,8 +23,8 @@ class DemoData:
     with the 'SystemData' and 'SenseData' classes.
 
     Attributes:
-        number1: random number
-        number2: random number
+        rndnum: random number
+        rndpcnt: random number
 
     Methods:
         as_list: returns a 'list' with data from each attribute as 'dict'
@@ -63,6 +63,6 @@ class DemoData:
 
     def as_dict(self):
         return {
-            'number1': self.rndnum.as_dict(),
-            'number2': self.rndpcnt.as_dict(),
+            'rndnum': self.rndnum.as_dict(),
+            'rndpcnt': self.rndpcnt.as_dict(),
         }

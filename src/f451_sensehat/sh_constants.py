@@ -31,9 +31,9 @@ KWD_ROUNDING = 'ROUNDING'
 #   C O N S T A N T S   F O R   D I S P L A Y   M O D E S
 # =========================================================
 DISPL_SPARKLE = 0           # Display sparkles
-DISPL_NUMBER_1 = 1          # Display download or temp
-DISPL_NUMBER_2 = 2          # Display upload or pressure
+DISPL_RNDNUM = 1            # Display random number
+DISPL_RNDPCNT = 2           # Display random percentage
 
 MIN_DISPL = DISPL_SPARKLE   # Cannot be smaller than smallest DISPL_xx value
-MAX_DISPL = 2               # Cannot be larger than largest DISPL_xx value
+MAX_DISPL = DISPL_RNDPCNT   # Cannot be larger than largest DISPL_xx value
 # fmt: on

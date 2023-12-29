@@ -73,7 +73,7 @@ APP_WAIT_1SEC = 1
 APP_MAX_DATA = 120                  # Max number of data points in the queue
 APP_DELTA_FACTOR = 0.02             # Any change within X% is considered negligable
 
-APP_DATA_TYPES = ['number1', 'number2']
+APP_DATA_TYPES = ['rndnum', 'rndpcnt']
 
 APP_DISPLAY_MODES = {
     f451SenseHat.KWD_DISPLAY_MIN: const.MIN_DISPL,
@@ -362,13 +362,13 @@ def update_SenseHat_LED(sense, data, colors=None):
         return f451Common.get_tri_colors(colors, True) if all(data.limits) else None
 
     # Check display mode. Each mode corresponds to a data type
-    if sense.displMode == 1:
+    if sense.displMode == const.DISPL_RNDNUM:
         minMax = _minMax(data.rndnum.as_tuple().data)
         dataClean = f451SenseHat.prep_data(data.rndnum.as_tuple())
         colorMap = _get_color_map(dataClean, colors)
         sense.display_as_graph(dataClean, minMax, colorMap)
 
-    elif sense.displMode == 2:
+    elif sense.displMode == const.DISPL_RNDPCNT:
         minMax = _minMax(data.rndpcnt.as_tuple().data)
         dataClean = f451SenseHat.prep_data(data.rndpcnt.as_tuple())
         colorMap = _get_color_map(dataClean, colors)
