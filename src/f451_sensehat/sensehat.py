@@ -369,11 +369,10 @@ class SenseHat:
         This is similar to 'num_to_range()' in f451 Labs Common module,
         but simplified for fitting values to SenseHAT LED display dimensions.
         """
-        return (
-            0
-            if minMax[0] == minMax[1]
-            else float(val - minMax[0]) / float(minMax[1] - minMax[0]) * height
-        )
+        if minMax is None or minMax[1] == minMax[0]:
+            return 0
+
+        return float(val - minMax[0]) / float(minMax[1] - minMax[0]) * height
 
     @staticmethod
     def _get_rgb(val, curRow, height):
@@ -670,7 +669,6 @@ class SenseHat:
             scaled = [self._clamp((v - vMin + 1) / (vMax - vMin + 1)) for v in values]
             pixels = [self._get_rgb(v, row, yMax) for row in range(yMax) for v in scaled]
 
-        print(pixels)
         # If there's a progress bar on bottom (8th) row, lets copy the existing
         # pixels, and then append them to the new (7 row) pixel list
         if self.displProgress:
