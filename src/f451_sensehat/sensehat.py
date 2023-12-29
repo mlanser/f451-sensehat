@@ -625,11 +625,11 @@ class SenseHat:
             default:
                 'float' (optional) default value to use when replacing 'None' values
         """
-        print("AS_GRAPH")
-
         # Skip this if we're in 'sleep' mode
         if self.isFake or self.displSleepMode:
             return
+
+        print("AS_GRAPH")
 
         # Create a list with 'displayWidth' num values. We add 0 (zero) to
         # the beginning of the list if whole set has less than 'displayWidth'
