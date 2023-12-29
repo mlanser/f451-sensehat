@@ -629,8 +629,6 @@ class SenseHat:
         if self.isFake or self.displSleepMode:
             return
 
-        print("AS_GRAPH")
-
         # Create a list with 'displayWidth' num values. We add 0 (zero) to
         # the beginning of the list if whole set has less than 'displayWidth'
         # num values. This allows us to simulate 'scrolling' right to left. We
@@ -684,6 +682,7 @@ class SenseHat:
             pixels += currPixels[-displWidth:]
 
         # Display all pixels for entire Sense HAT LED all at once
+        print(pixels)
         self._SENSE.set_pixels(pixels)
 
     def display_as_text(self, *args):
