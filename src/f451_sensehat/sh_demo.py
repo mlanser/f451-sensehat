@@ -140,7 +140,7 @@ class AppRT(f451Common.Runtime):
 
         # Update log file/level or display mode?
         self._init_log_settings(cliArgs)
-        self._init_dmode_settings(cliArgs)
+        # self._init_dmode_settings(cliArgs)
 
         # Initialize various counters, etc.
         self.timeSinceUpdate = float(0)
