@@ -656,7 +656,8 @@ class SenseHat:
 
         # Get colors based on limits and color map? Or generate based on
         # value itself compared to defined limits?
-        if all(data.limits) and False:
+        if all(data.limits):
+            assert False
             pixels = [
                 self._get_rgb_from_map(v, minMax, row, yMax, data.limits, colorMap)
                 for row in range(yMax)
@@ -669,13 +670,7 @@ class SenseHat:
             # can happen when original data set has more values than the chunk
             # (8 values) that we display on the Sense HAT 8x8 LED.
             scaled = [self._clamp((v - vMin + 1) / (vMax - vMin + 1)) for v in values]
-            # pixels = [
-            #     _get_rgb(scaled[col], row, yMax)
-            #     for row in range(yMax)
-            #     for col in range(displWidth)
-            # ]
             pixels = [self._get_rgb(v, row, yMax) for row in range(yMax) for v in scaled]
-            print("no_limits")
 
         print(pixels)
         # If there's a progress bar on bottom (8th) row, lets copy the existing
