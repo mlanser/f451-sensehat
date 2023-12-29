@@ -411,7 +411,6 @@ class SenseHat:
         """
         # Should the pixel on this row be black?
         scaledVal = int(self._clamp(self._scale(val, minMax, height), 0, height))
-        print(f"R:{curRow} - H:{height} - V:{val} - SV:{scaledVal}")
         if curRow < (height - scaledVal):
             return RGB_BLACK
 
@@ -663,7 +662,6 @@ class SenseHat:
                 for row in range(yMax)
                 for v in values
             ]
-            print("all_limits")
         else:
             # Scale incoming values to be between 0 and 1. We may need to clamp
             # values when values are outside min/max for current sub-set. This
