@@ -662,6 +662,7 @@ class SenseHat:
                 for row in range(yMax)
                 for v in values
             ]
+            print("all_limits")
         else:
             # Scale incoming values to be between 0 and 1. We may need to clamp
             # values when values are outside min/max for current sub-set. This
@@ -674,7 +675,9 @@ class SenseHat:
             #     for col in range(displWidth)
             # ]
             pixels = [self._get_rgb(v, row, yMax) for row in range(yMax) for v in scaled]
+            print("no_limits")
 
+        print(pixels)
         # If there's a progress bar on bottom (8th) row, lets copy the existing
         # pixels, and then append them to the new (7 row) pixel list
         if self.displProgress:
@@ -682,7 +685,6 @@ class SenseHat:
             pixels += currPixels[-displWidth:]
 
         # Display all pixels for entire Sense HAT LED all at once
-        print(pixels)
         self._SENSE.set_pixels(pixels)
 
     def display_as_text(self, *args):
