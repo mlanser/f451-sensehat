@@ -415,6 +415,13 @@ def init_cli_parser(appName, appVersion, setDefaults=True):
         default=-1,
         help='number of uploads before exiting',
     )
+    parser.add_argument(
+        '--dmode',
+        action='store',
+        type=int,
+        default=-1,
+        help='display mode',
+    )
 
     return parser
     # fmt: on
