@@ -365,21 +365,18 @@ def update_SenseHat_LED(sense, data, colors=None):
 
     # Check display mode. Each mode corresponds to a data type
     if sense.displMode == const.DISPL_RNDNUM:
-        print("RNDNUM")
         minMax = _minMax(data.rndnum.as_tuple().data)
         dataClean = f451SenseHat.prep_data(data.rndnum.as_tuple())
         colorMap = _get_color_map(dataClean, colors)
         sense.display_as_graph(dataClean, minMax, colorMap)
 
     elif sense.displMode == const.DISPL_RNDPCNT:
-        print("RNDPCNT")
         minMax = _minMax(data.rndpcnt.as_tuple().data)
         dataClean = f451SenseHat.prep_data(data.rndpcnt.as_tuple())
         colorMap = _get_color_map(dataClean, colors)
         sense.display_as_graph(dataClean, minMax, colorMap)
 
     else:  # Display sparkles
-        print("SPARKLE")
         sense.display_sparkle()
 
 

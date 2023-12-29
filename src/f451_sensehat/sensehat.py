@@ -656,7 +656,7 @@ class SenseHat:
 
         # Get colors based on limits and color map? Or generate based on
         # value itself compared to defined limits?
-        if all(data.limits):
+        if all(data.limits) and False:
             pixels = [
                 self._get_rgb_from_map(v, minMax, row, yMax, data.limits, colorMap)
                 for row in range(yMax)
