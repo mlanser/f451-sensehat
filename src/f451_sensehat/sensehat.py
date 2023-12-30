@@ -499,6 +499,7 @@ class SenseHat:
         print(self.displayModes)
         if isinstance(mode, str) and mode in self.displayModes:
             newMode = mode
+            print(f"OLD:{self.displMode} - NEW:{newMode}")
         elif isinstance(mode, int):
             displMax = max(0, len(self.displayModes) - 1)
             
@@ -511,9 +512,8 @@ class SenseHat:
                 newModeIndx = displMax
 
             newMode = self.displayModes[newModeIndx]
+            print(f"OLD:{self.displMode} - NEW:{newMode} - INDX: {newModeIndx}")
 
-
-        print(f"OLD:{self.displMode} - NEW:{newMode}")
         print(self.displayModes)
         self.displMode = newMode
 
