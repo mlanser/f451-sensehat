@@ -477,7 +477,12 @@ class SenseHat:
         return self._SENSE.get_temperature()
 
     def add_displ_modes(self, modes):
-        self.displayModes += modes
+        """Add list of display modes to existing list
+        
+        We combine the lists, convert them to a set to ensure that
+        there are no duplicates, and then convert back to a list.
+        """
+        self.displayModes = list(set(self.displayModes + modes))
 
     def set_display_mode(self, mode):
         """Change LED display mode
