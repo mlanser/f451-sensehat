@@ -503,6 +503,8 @@ class SenseHat:
 
             newMode = self.displayModes[newModeIndx]
 
+
+        print(f"OLD:{self.displMode} - NEW:{newMode}")
         self.displMode = newMode
 
         # Wake up display?
