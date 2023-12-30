@@ -371,11 +371,8 @@ def update_SenseHat_LED(sense, data, colors=None):
     else:  # Display sparkles
         sense.display_sparkle()
 
-    # APP_DISPL_MODES = [ 
-    #     f451SenseHat.DISPL_SPARKLE,     # Show 'sparkles' view
-    #     const.DISPL_RNDNUM,             # Show 'rndnum' view
-    #     const.DISPL_RNDPCNT,            # Show 'rndpcnt' view
-    # ]
+    print(sense.displMode)
+
 
 def init_cli_parser(appName, appVersion, setDefaults=True):
     """Initialize CLI (ArgParse) parser.
