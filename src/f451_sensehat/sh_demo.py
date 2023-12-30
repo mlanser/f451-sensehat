@@ -110,15 +110,6 @@ class AppRT(f451Common.Runtime):
         if cliArgs.log is not None:
             self.logger.set_log_file(appRT.logLvl, cliArgs.log)
 
-    def _init_dmode_settings(self, cliArgs):
-        """Helper for setting display mode settings"""
-        if cliArgs.dmode >= 0:
-            dmode = min(
-                max(int(cliArgs.dmode), APP_DISPLAY_MODES[f451SenseHat.KWD_DISPLAY_MIN]), 
-                APP_DISPLAY_MODES[f451SenseHat.KWD_DISPLAY_MAX]
-            )
-            self.config.update({f451SenseHat.KWD_DISPLAY: dmode})
-
     def init_runtime(self, cliArgs, data):
         """Initialize the 'runtime' variable
         
@@ -142,9 +133,8 @@ class AppRT(f451Common.Runtime):
         self.ioRounding = self.config.get(const.KWD_ROUNDING, const.DEF_ROUNDING)
         self.ioUploadAndExit = False
 
-        # Update log file/level or display mode?
+        # Initialize log file/level
         self._init_log_settings(cliArgs)
-        self._init_dmode_settings(cliArgs)
 
         # Initialize various counters, etc.
         self.timeSinceUpdate = float(0)
@@ -577,10 +567,14 @@ def main(cliArgs=None):  # sourcery skip: extract-method
         # events and set 'sleep' and 'display' modes.
         appRT.add_sensor('SenseHat', f451SenseHat.SenseHat)
         appRT.sensors['SenseHat'].joystick_init(**APP_JOYSTICK_ACTIONS)
-        appRT.sensors['SenseHat'].display_init(**APP_DISPLAY_MODES)
+        appRT.sensors['SenseHat'].add_displ_modes(APP_DISPL_MODES)
         appRT.sensors['SenseHat'].update_sleep_mode(cliArgs.noLED)
         appRT.sensors['SenseHat'].displProgress = cliArgs.progress
         appRT.sensors['SenseHat'].display_message(APP_NAME)
+
+        appRT.sensors['SenseHat'].set_display_mode(
+            cliArgs.dMode or appRT.config.get(f451SenseHat.KWD_DISPLAY)
+        )
 
         # Add fake sensor
         appRT.add_sensor('FakeSensor', f451Common.FakeSensor)

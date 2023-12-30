@@ -32,7 +32,4 @@ KWD_ROUNDING = 'ROUNDING'
 # =========================================================
 DISPL_RNDNUM = 'rndnum'     # Display random number
 DISPL_RNDPCNT = 'rndpcnt'   # Display random percentage
-
-# MIN_DISPL = DISPL_SPARKLE   # Cannot be smaller than smallest DISPL_xx value
-# MAX_DISPL = DISPL_RNDPCNT   # Cannot be larger than largest DISPL_xx value
 # fmt: on

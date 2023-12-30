@@ -114,8 +114,8 @@ KWD_ROTATION = 'ROTATION'
 KWD_DISPLAY = 'DISPLAY'
 KWD_PROGRESS = 'PROGRESS'
 KWD_SLEEP = 'SLEEP'
-KWD_DISPLAY_MIN = 'DISPLAYMIN'
-KWD_DISPLAY_MAX = 'DISPLAYMAX'
+# KWD_DISPLAY_MIN = 'DISPLAYMIN'
+# KWD_DISPLAY_MAX = 'DISPLAYMAX'
 
 KWD_BTN_UP = 'BTNUP'
 KWD_BTN_DWN = 'BTNDWN'
@@ -490,9 +490,6 @@ class SenseHat:
                   if string, then move to specific view/mode
 
         """
-        def _next_displ_mode():
-            pass
-
         newMode = DISPL_SPARKLE
 
         if isinstance(mode, str) and mode in self.displayModes:
@@ -515,34 +512,34 @@ class SenseHat:
         # Clear the display
         self._SENSE.clear()
 
-    def _NUKE_update_display_mode(self, direction):
-        """Change LED display mode
+    # def _NUKE_update_display_mode(self, direction):
+    #     """Change LED display mode
 
-        Change the LED display mode and also wake
-        up the display if needed.
+    #     Change the LED display mode and also wake
+    #     up the display if needed.
 
-        Args:
-            direction: pos/neg integer
-        """
-        if int(direction) < 0:
-            self.displMode = (
-                self.displModeMax
-                if self.displMode <= self.displModeMin
-                else self.displMode - STEP_1
-            )
-        else:
-            self.displMode = (
-                self.displModeMin
-                if self.displMode >= self.displModeMax
-                else self.displMode + STEP_1
-            )
+    #     Args:
+    #         direction: pos/neg integer
+    #     """
+    #     if int(direction) < 0:
+    #         self.displMode = (
+    #             self.displModeMax
+    #             if self.displMode <= self.displModeMin
+    #             else self.displMode - STEP_1
+    #         )
+    #     else:
+    #         self.displMode = (
+    #             self.displModeMin
+    #             if self.displMode >= self.displModeMax
+    #             else self.displMode + STEP_1
+    #         )
 
-        # Wake up display?
-        if self.displSleepMode:
-            self.display_on()
+    #     # Wake up display?
+    #     if self.displSleepMode:
+    #         self.display_on()
 
-        # Clear the display
-        self._SENSE.clear()
+    #     # Clear the display
+    #     self._SENSE.clear()
 
     def update_sleep_mode(self, *args):
         """Enable or disable LED sleep mode
@@ -575,19 +572,19 @@ class SenseHat:
         self._SENSE.stick.direction_right = kwargs.get(KWD_BTN_RHT, SenseHat._btn_dummy)
         self._SENSE.stick.direction_middle = kwargs.get(KWD_BTN_MDL, SenseHat._btn_dummy)
 
-    def display_init(self, **kwargs):
-        """Initialize LED display
+    # def _NUKE_display_init(self, **kwargs):
+    #     """Initialize LED display
 
-        We can set/update the number of possible displays by
-        using the 'kwargs' to displayMode min/max values.
+    #     We can set/update the number of possible displays by
+    #     using the 'kwargs' to displayMode min/max values.
 
-        Args:
-            kwargs: optional values for displayMode min/max values
-        """
-        self.displModeMin = kwargs.get(KWD_DISPLAY_MIN, self.displModeMin)
-        self.displModeMax = kwargs.get(KWD_DISPLAY_MAX, self.displModeMax)
+    #     Args:
+    #         kwargs: optional values for displayMode min/max values
+    #     """
+    #     self.displModeMin = kwargs.get(KWD_DISPLAY_MIN, self.displModeMin)
+    #     self.displModeMax = kwargs.get(KWD_DISPLAY_MAX, self.displModeMax)
 
-        self.display_on()
+    #     self.display_on()
 
     def display_rotate(self, direction):
         """Rotate LED display
