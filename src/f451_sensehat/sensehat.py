@@ -499,7 +499,11 @@ class SenseHat:
             
             newModeIndx = self.displayModes.index(self.displMode)
             newModeIndx += (-1 if int(mode) < 0 else 1)
-            newModeIndx = min(max(0, newModeIndx), displMax)
+
+            if newModeIndx > displMax:
+                newModeIndx = 0
+            elif newModeIndx < 0:
+                newModeIndx = displMax
 
             newMode = self.displayModes[newModeIndx]
 
