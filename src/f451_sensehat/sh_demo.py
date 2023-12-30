@@ -573,7 +573,7 @@ def main(cliArgs=None):  # sourcery skip: extract-method
         appRT.sensors['SenseHat'].display_message(APP_NAME)
 
         appRT.sensors['SenseHat'].set_display_mode(
-            cliArgs.dMode or appRT.config.get(f451SenseHat.KWD_DISPLAY)
+            cliArgs.dmode or appRT.config.get(f451SenseHat.KWD_DISPLAY)
         )
 
         # Add fake sensor
