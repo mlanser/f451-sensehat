@@ -73,12 +73,16 @@ APP_WAIT_1SEC = 1
 APP_MAX_DATA = 120                  # Max number of data points in the queue
 APP_DELTA_FACTOR = 0.02             # Any change within X% is considered negligable
 
-APP_DATA_TYPES = ['rndnum', 'rndpcnt']
+APP_DISPL_MODES = [ 
+    f451SenseHat.DISPL_SPARKLE,     # Show 'sparkles' view
+    const.DISPL_RNDNUM,             # Show 'rndnum' view
+    const.DISPL_RNDPCNT,            # Show 'rndpcnt' view
+]
 
-APP_DISPLAY_MODES = {
-    f451SenseHat.KWD_DISPLAY_MIN: const.MIN_DISPL,
-    f451SenseHat.KWD_DISPLAY_MAX: const.MAX_DISPL,
-}
+# APP_DISPLAY_MODES = {
+#     f451SenseHat.KWD_DISPLAY_MIN: const.MIN_DISPL,
+#     f451SenseHat.KWD_DISPLAY_MAX: const.MAX_DISPL,
+# }
 
 class AppRT(f451Common.Runtime):
     def __init__(self, appName, appVersion, appNameShort=None, appLog=None, appSettings=None):

@@ -66,10 +66,11 @@ DISPL_TOP_Y = 0
 DISPL_MAX_COL = 8               # sense has an 8x8 LED display
 DISPL_MAX_ROW = 8
 
+DISPL_SPARKLE = 'sparkles'      # Name of 'sparkles' view :-)
+MAX_SPARKLE_PCNT = 0.2          # 20% sparkles
+
 PROX_DEBOUNCE = 0.5             # Delay to debounce proximity sensor on 'tap'
 PROX_LIMIT = 1500               # Threshold for proximity sensor to detect 'tap'
-
-MAX_SPARKLE_PCNT = 0.2          # 20% sparkles
 
 RGB_BLACK = (0, 0, 0)
 RGB_WHITE = (255, 255, 255)
@@ -258,7 +259,7 @@ class SenseHat:
         get_pressure:       Get barometric pressure from sensor
         get_humidity:       Get humidity from sensor
         get_temperature:    Get temperature from sensor
-        update_display_mode: Switch display mode
+        set_display_mode:   Switch display mode
         update_sleep_mode:  Switch to/from sleep mode
         joystick_init:      Initialize joystick actions
         display_init:       Initialize display so we can draw on it
@@ -294,11 +295,12 @@ class SenseHat:
         self._SENSE = self._init_SENSE(**settings)
 
         self.displRotation = settings.get(KWD_ROTATION, DEF_ROTATION)
-        self.displMode = settings.get(KWD_DISPLAY, DEF_DISPL_MODE)
         self.displProgress = bool(settings.get(KWD_PROGRESS, STATUS_ON))
 
-        self.displModeMin = settings.get(KWD_DISPLAY_MIN, 0)
-        self.displModeMax = settings.get(KWD_DISPLAY_MAX, 0)
+        self.displayModes = [DISPL_SPARKLE]
+        self.displMode = DISPL_SPARKLE
+        # self.displModeMin = settings.get(KWD_DISPLAY_MIN, 0)
+        # self.displModeMax = settings.get(KWD_DISPLAY_MAX, 0)
 
         self.displSleepTime = settings.get(KWD_SLEEP, DEF_SLEEP)
         self.displSleepMode = False
@@ -474,7 +476,46 @@ class SenseHat:
         """Get temperature data from Sense HAT sensor"""
         return self._SENSE.get_temperature()
 
-    def update_display_mode(self, direction):
+    def add_displ_modes(self, modes):
+        self.displayModes = list(set(self.displayModes + modes))
+
+    def set_display_mode(self, mode):
+        """Change LED display mode
+
+        Change the LED display mode and also wake
+        up the display if needed.
+
+        Args:
+            mode: if pos/neg int, then move to next/prev view/mode
+                  if string, then move to specific view/mode
+
+        """
+        def _next_displ_mode():
+            pass
+
+        newMode = DISPL_SPARKLE
+
+        if isinstance(mode, str) and mode in self.displayModes:
+            newMode = mode
+        elif isinstance(mode, int):
+            displMax = max(0, len(self.displayModes) - 1)
+            
+            newModeIndx = self.displayModes.index(self.displMode)
+            newModeIndx += (-1 if int(mode) < 0 else 1)
+            newModeIndx = min(max(0, newModeIndx), displMax)
+
+            newMode = self.displayModes[newModeIndx]
+
+        self.displMode = newMode
+
+        # Wake up display?
+        if self.displSleepMode:
+            self.display_on()
+
+        # Clear the display
+        self._SENSE.clear()
+
+    def _NUKE_update_display_mode(self, direction):
         """Change LED display mode
 
         Change the LED display mode and also wake

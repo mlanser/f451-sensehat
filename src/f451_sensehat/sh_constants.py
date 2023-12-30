@@ -30,10 +30,9 @@ KWD_ROUNDING = 'ROUNDING'
 # =========================================================
 #   C O N S T A N T S   F O R   D I S P L A Y   M O D E S
 # =========================================================
-DISPL_SPARKLE = 0           # Display sparkles
-DISPL_RNDNUM = 1            # Display random number
-DISPL_RNDPCNT = 2           # Display random percentage
+DISPL_RNDNUM = 'rndnum'     # Display random number
+DISPL_RNDPCNT = 'rndpcnt'   # Display random percentage
 
-MIN_DISPL = DISPL_SPARKLE   # Cannot be smaller than smallest DISPL_xx value
-MAX_DISPL = DISPL_RNDPCNT   # Cannot be larger than largest DISPL_xx value
+# MIN_DISPL = DISPL_SPARKLE   # Cannot be smaller than smallest DISPL_xx value
+# MAX_DISPL = DISPL_RNDPCNT   # Cannot be larger than largest DISPL_xx value
 # fmt: on
