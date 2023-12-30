@@ -290,7 +290,7 @@ def btn_left(event):
     global appRT
 
     if event.action != f451SenseHat.BTN_RELEASE:
-        appRT.sensors['SenseHat'].update_display_mode(-1)
+        appRT.sensors['SenseHat'].set_display_mode(-1)
         appRT.displayUpdate = time.time()
 
 
@@ -302,7 +302,7 @@ def btn_right(event):
     global appRT
 
     if event.action != f451SenseHat.BTN_RELEASE:
-        appRT.sensors['SenseHat'].update_display_mode(1)
+        appRT.sensors['SenseHat'].set_display_mode(1)
         appRT.displayUpdate = time.time()
 
 
@@ -371,6 +371,11 @@ def update_SenseHat_LED(sense, data, colors=None):
     else:  # Display sparkles
         sense.display_sparkle()
 
+    # APP_DISPL_MODES = [ 
+    #     f451SenseHat.DISPL_SPARKLE,     # Show 'sparkles' view
+    #     const.DISPL_RNDNUM,             # Show 'rndnum' view
+    #     const.DISPL_RNDPCNT,            # Show 'rndpcnt' view
+    # ]
 
 def init_cli_parser(appName, appVersion, setDefaults=True):
     """Initialize CLI (ArgParse) parser.
