@@ -491,7 +491,7 @@ class SenseHat:
 
         """
         newMode = DISPL_SPARKLE
-
+        print(self.displayModes)
         if isinstance(mode, str) and mode in self.displayModes:
             newMode = mode
         elif isinstance(mode, int):
@@ -505,6 +505,7 @@ class SenseHat:
 
 
         print(f"OLD:{self.displMode} - NEW:{newMode}")
+        print(self.displayModes)
         self.displMode = newMode
 
         # Wake up display?
