@@ -79,10 +79,6 @@ APP_DISPL_MODES = [
     const.DISPL_RNDPCNT,            # Show 'rndpcnt' view
 ]
 
-# APP_DISPLAY_MODES = {
-#     f451SenseHat.KWD_DISPLAY_MIN: const.MIN_DISPL,
-#     f451SenseHat.KWD_DISPLAY_MAX: const.MAX_DISPL,
-# }
 
 class AppRT(f451Common.Runtime):
     def __init__(self, appName, appVersion, appNameShort=None, appLog=None, appSettings=None):
