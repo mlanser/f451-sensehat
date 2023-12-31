@@ -39,7 +39,7 @@ f451_sensehat = "f451_sensehat.__main__:main"
 sh_demo = "f451_sensehat.sh_demo:main"
 
 [tool.bumpver]
-current_version = "1.5.2"
+current_version = "1.5.3"
 version_pattern = "MAJOR.MINOR.PATCH"
 commit_message = "bump version {old_version} -> {new_version}"
 tag_message = "{new_version}"
