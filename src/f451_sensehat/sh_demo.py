@@ -371,8 +371,6 @@ def update_SenseHat_LED(sense, data, colors=None):
     else:  # Display sparkles
         sense.display_sparkle()
 
-    print(sense.displMode)
-
 
 def init_cli_parser(appName, appVersion, setDefaults=True):
     """Initialize CLI (ArgParse) parser.
@@ -572,7 +570,7 @@ def main(cliArgs=None):  # sourcery skip: extract-method
         appRT.sensors['SenseHat'].add_displ_modes(APP_DISPL_MODES)
         appRT.sensors['SenseHat'].update_sleep_mode(cliArgs.noLED)
         appRT.sensors['SenseHat'].displProgress = cliArgs.progress
-        appRT.sensors['SenseHat'].display_message(APP_NAME)
+        # appRT.sensors['SenseHat'].display_message(APP_NAME)
 
         appRT.sensors['SenseHat'].set_display_mode(
             cliArgs.dmode or appRT.config.get(f451SenseHat.KWD_DISPLAY)
