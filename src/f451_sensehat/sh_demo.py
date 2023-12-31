@@ -413,7 +413,6 @@ def init_cli_parser(appName, appVersion, setDefaults=True):
         '--dmode',
         action='store',
         type=int,
-        default=-1,
         help='display mode',
     )
 
