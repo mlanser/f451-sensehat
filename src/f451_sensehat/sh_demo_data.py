@@ -4,9 +4,6 @@ This class defines a data structure that can be used
 to manage misc. demo data. This object follows overall 
 design of SenseHat Data object, but is customized for
 random demo data collected in the demo application.
-
-Dependencies:
-    TBD
 """
 
 from collections import deque

@@ -47,8 +47,6 @@ import f451_sensehat.sensehat as f451SenseHat
 
 from rich.console import Console
 
-# from Adafruit_IO import RequestError, ThrottlingError
-
 # Install Rich 'traceback' and 'pprint' to
 # make (debug) life is easier. Trust me!
 from rich.pretty import pprint
@@ -74,7 +72,6 @@ APP_MAX_DATA = 120                  # Max number of data points in the queue
 APP_DELTA_FACTOR = 0.02             # Any change within X% is considered negligable
 
 APP_DISPL_MODES = [ 
-    f451SenseHat.DISPL_SPARKLE,     # Show 'sparkles' view
     const.DISPL_RNDNUM,             # Show 'rndnum' view
     const.DISPL_RNDPCNT,            # Show 'rndpcnt' view
 ]
@@ -83,6 +80,12 @@ COLOR_LOGO_FG = (255, 0, 0)
 COLOR_LOGO_BG = (67, 70, 75)
 
 class AppRT(f451Common.Runtime):
+    """Application runtime object.
+    
+    We use this object to store/manage configuration and any other variables
+    required to run this application as object attributes. This allows us to
+    have fewer global variables.
+    """
     def __init__(self, appName, appVersion, appNameShort=None, appLog=None, appSettings=None):
         super().__init__(
             appName, 
@@ -366,7 +369,8 @@ def update_SenseHat_LED(sense, data, colors=None):
         colorMap = _get_color_map(dataClean, colors)
         sense.display_as_graph(dataClean, minMax, colorMap)
 
-    else:  # Display sparkles
+    # Or ... display sparkles :-)
+    else:
         sense.display_sparkle()
 
 
@@ -529,9 +533,6 @@ def main(cliArgs=None):  # sourcery skip: extract-method
     main application loop.
 
     NOTE:
-     -  Application will exit with error level 1 if invalid Adafruit IO
-        or Arduino Cloud feeds are provided
-
      -  Application will exit with error level 0 if either no arguments
         are entered via CLI, or if arguments '-V' or '--version' are used.
         No data will be uploaded will be sent in that case.
@@ -576,6 +577,8 @@ def main(cliArgs=None):  # sourcery skip: extract-method
         appRT.add_sensor('FakeSensor', f451Common.FakeSensor)
 
     except KeyboardInterrupt:
+        appRT.sensors['SenseHat'].display_reset()
+        appRT.sensors['SenseHat'].display_off()
         print(f'{APP_NAME} (v{APP_VERSION}) - Session terminated by user')
         sys.exit(0)
 

@@ -6,7 +6,7 @@ The *f451 Labs SenseHat* module encapsulates the drivers for the [*Raspberry Pi 
 
 ## Install
 
-This module is not (yet) available on PyPi. however, you can still use `pip` to install the module directly from Github (see below).
+This module is not (yet) available on PyPi. However, you can still use `pip` to install the module directly from Github (see below).
 
 ### Dependencies
 
@@ -16,7 +16,7 @@ This module is dependent on the following libraries:
 
 NOTE: Only install `sense-hat` library on a device that also has the physical Sense HAT installed.
 
-NOTE: You can run this app in demo mode in (almost) any device even without the Sense HAT. It will then create random numbers and can send output to the `logger` when log level is `DEBUG` or when `--debug` flag is used.
+NOTE: You can run this app in demo mode on (almost) any device even without the Sense HAT. It will then create random numbers and can send output to the `logger` when log level is `DEBUG` or when `--debug` flag is used.
 
 ### Installing from Github using `pip`
 
@@ -28,9 +28,9 @@ $ pip install 'f451-sensehat @ git+https://github.com/mlanser/f451-sensehat.git'
 
 ## How to use
 
-### SenseHat Device
+### Sense HAT Device
 
-The `SenseHat` object makes it easy to interact with the *Sense HAT* device. The methods of this object help read sensor data, display data to the 8x8 LED, etc., and using the module is straightforward. Simply `import` it into your code and instantiate an `SenseHat` object which you can then use throughout your code.
+The `SenseHat` object makes it easy to interact with the Sense HAT device. The methods of this object help read sensor data, display data to the 8x8 LED, etc., and using the module is straightforward. Simply `import` it into your code and instantiate an `SenseHat` object which you can then use throughout your code.
 
 ```Python
 # Import f451 Labs SenseHat
@@ -40,7 +40,7 @@ from f451_sensehat.sensehat import SenseHat
 # and LED display on Sense HAT
 mySense = SenseHat({
     "ROTATION": 0,
-    "DISPLAY": 0,
+    "DISPLAY": 'sparkles',
     "PROGRESS": 0,
     "SLEEP": 600    
 })
@@ -59,7 +59,7 @@ The *f451 Labs SenseHat* module also includes a `SenseData` object and a few oth
 from f451_sensehat.sensehat_data import SenseData
 
 maxLen = 10     # Max length of queue
-defVal = 1      # Default value for initialization
+defVal = None   # Default value for initialization
 
 myData = SenseData(defVal, maxlen)
 
@@ -70,9 +70,9 @@ myData.pressure.data.append(mySense.get_pressure())
 myData.humidity.data.append(mySense.get_humidity())
 ```
 
-### SenseHat Demo
+### SenseHat Module Demo
 
-The **f451 Labs SenseHat** module includes a (fairly) comprehensive CLI UI demo which you can launch as follows:
+The **f451 Labs SenseHat** module includes a (fairly) comprehensive demo which you can launch as follows:
 
 ```bash
 $ python -m f451_sensehat.sh_demo [<options>]
@@ -85,9 +85,11 @@ $ sh_demo [<options>]
 $ sh_demo -h 
 ```
 
+This demo does not display much in the console. Instead the focus is on displaying data on the Sense HAT 8x8 LED display. You can switch between different display modes using the onboard joystick, and you can also rotate the LED screen.  
+
 You can also also adjust the settings in the `sh_demo_settings.toml` file. For example, if you change the `PROGRESS` setting to 1, then the Sense HAT LED will display a progress bar indicating when the next (simulated) upload will happen.
 
-Also, the joystick on the Sense HAT allows you to rotate the LED screen and switch between display modes. There is also a 'sleep mode' which turns off the display automatically after a certain amount of time. You can also turn on/off the LED display by pushing the joystick down.
+There is also a 'sleep mode' which turns off the display automatically after a certain amount of time. You can also turn on/off the LED display by pushing/tapping the joystick button (down).
 
 ```toml
 # File: sh_demo_settings.toml
@@ -105,6 +107,10 @@ $ sh_demo --uploads 10
 
 # Show 'progress bar' regardless of setting in 'toml' file
 $ sh_demo --progress
+
+# Show specific display mode (e.g. 'rndpcnt') regardless 
+# of setting in 'toml' file
+$ sh_demo --dmode rndpcnt
 ```
 
 ## How to test
