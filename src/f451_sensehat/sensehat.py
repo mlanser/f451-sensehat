@@ -52,7 +52,6 @@ __all__ = [
 #              M I S C .   C O N S T A N T S
 # =========================================================
 DEF_ROTATION = 0                # Default display rotation
-DEF_DISPL_MODE = 0              # Default display mode
 DEF_SLEEP = 600                 # Default time to sleep (in seconds)
 DEF_LED_OFFSET_X = 0            # Default horizontal offset for LED
 DEF_LED_OFFSET_Y = 0            # Default vertical offseet for LED
@@ -101,7 +100,6 @@ COLOR_PBAR_FG = RGB_CYAN        # Default prog bar color
 COLOR_PBAR_BG = RGB_GREY_BLUE   # Default prog bar background
 
 ROTATE_90 = 90                  # Rotate 90 degrees
-STEP_1 = 1                      # Display mode step
 
 BTN_RELEASE = ACTION_RELEASED
 
@@ -113,8 +111,6 @@ KWD_ROTATION = 'ROTATION'
 KWD_DISPLAY = 'DISPLAY'
 KWD_PROGRESS = 'PROGRESS'
 KWD_SLEEP = 'SLEEP'
-# KWD_DISPLAY_MIN = 'DISPLAYMIN'
-# KWD_DISPLAY_MAX = 'DISPLAYMAX'
 
 KWD_BTN_UP = 'BTNUP'
 KWD_BTN_DWN = 'BTNDWN'
@@ -244,7 +240,7 @@ class SenseHat:
 
     Attributes:
         ROTATION:   Default rotation for LED display - [0, 90, 180, 270]
-        DISPLAY:    Default display mode [0...]
+        DISPLAY:    Default display mode
         PROGRESS:   Show progress bar - [0 = no, 1 = yes]
         SLEEP:      Number of seconds until LED goes to screen saver mode
 
@@ -258,6 +254,7 @@ class SenseHat:
         get_pressure:       Get barometric pressure from sensor
         get_humidity:       Get humidity from sensor
         get_temperature:    Get temperature from sensor
+        add_display_modes:  Add one or more display modes to the list
         set_display_mode:   Switch display mode
         update_sleep_mode:  Switch to/from sleep mode
         joystick_init:      Initialize joystick actions
@@ -298,8 +295,6 @@ class SenseHat:
 
         self.displayModes = [DISPL_SPARKLE]
         self.displMode = DISPL_SPARKLE
-        # self.displModeMin = settings.get(KWD_DISPLAY_MIN, 0)
-        # self.displModeMax = settings.get(KWD_DISPLAY_MAX, 0)
 
         self.displSleepTime = settings.get(KWD_SLEEP, DEF_SLEEP)
         self.displSleepMode = False
@@ -804,8 +799,8 @@ class SenseHat:
         """
         # Skip this if we're in 'sleep' mode
         if not (self.isFake or self.displSleepMode):
-            fg = RGB_RED if fgCol is None else fgCol
-            bg = RGB_GREY if bgCol is None else bgCol
+            fg = RGB_GREY if fgCol is None else fgCol
+            bg = RGB_BLACK if bgCol is None else bgCol
             self._SENSE.show_message(msg, text_colour=fg, back_colour=bg)
             self._SENSE.clear()  # Clear 8x8 LED
 

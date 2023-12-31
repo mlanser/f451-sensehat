@@ -79,6 +79,8 @@ APP_DISPL_MODES = [
     const.DISPL_RNDPCNT,            # Show 'rndpcnt' view
 ]
 
+COLOR_LOGO_FG = (255, 0, 0)
+COLOR_LOGO_BG = (67, 70, 75)
 
 class AppRT(f451Common.Runtime):
     def __init__(self, appName, appVersion, appNameShort=None, appLog=None, appSettings=None):
@@ -565,7 +567,7 @@ def main(cliArgs=None):  # sourcery skip: extract-method
         appRT.sensors['SenseHat'].add_displ_modes(APP_DISPL_MODES)
         appRT.sensors['SenseHat'].update_sleep_mode(cliArgs.noLED)
         appRT.sensors['SenseHat'].displProgress = cliArgs.progress
-        appRT.sensors['SenseHat'].display_message(APP_NAME)
+        appRT.sensors['SenseHat'].display_message(APP_NAME, COLOR_LOGO_FG, COLOR_LOGO_BG)
 
         appRT.sensors['SenseHat'].set_display_mode(
             cliArgs.dmode or appRT.config.get(f451SenseHat.KWD_DISPLAY)
