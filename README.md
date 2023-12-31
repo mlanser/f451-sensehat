@@ -1,4 +1,4 @@
-# f451 Labs SenseHat module v1.5.3
+# f451 Labs SenseHat module v1.5.4
 
 ## Overview
 
