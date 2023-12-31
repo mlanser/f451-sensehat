@@ -481,7 +481,15 @@ class SenseHat:
         
         We combine the lists, convert them to a set to ensure that
         there are no duplicates, and then convert back to a list.
+
+        Args:
+            modes: list of one or more view names
         """
+        # If it's a single string, then we'll assume it's the name
+        # of a new view and we'll convert it to alist with 1 item.
+        if isinstance(modes, str):
+            modes = [modes]
+        
         self.displayModes = list(set(self.displayModes + modes))
 
     def set_display_mode(self, mode):
@@ -496,10 +504,12 @@ class SenseHat:
 
         """
         newMode = DISPL_SPARKLE
-        print(f"MODE: {mode}")
+
+        # Did we get a string? Check if it's a valid view.
         if isinstance(mode, str) and mode in self.displayModes:
             newMode = mode
-            print(f"OLD:{self.displMode} - NEW:{newMode}")
+
+        # Or did we get 'direction' ? Then loop to prev/next view.
         elif isinstance(mode, int):
             displMax = max(0, len(self.displayModes) - 1)
             
@@ -512,9 +522,7 @@ class SenseHat:
                 newModeIndx = displMax
 
             newMode = self.displayModes[newModeIndx]
-            print(f"OLD:{self.displMode} - NEW:{newMode} - INDX: {newModeIndx}")
 
-        print(self.displayModes)
         self.displMode = newMode
 
         # Wake up display?
@@ -523,35 +531,6 @@ class SenseHat:
 
         # Clear the display
         self._SENSE.clear()
-
-    # def _NUKE_update_display_mode(self, direction):
-    #     """Change LED display mode
-
-    #     Change the LED display mode and also wake
-    #     up the display if needed.
-
-    #     Args:
-    #         direction: pos/neg integer
-    #     """
-    #     if int(direction) < 0:
-    #         self.displMode = (
-    #             self.displModeMax
-    #             if self.displMode <= self.displModeMin
-    #             else self.displMode - STEP_1
-    #         )
-    #     else:
-    #         self.displMode = (
-    #             self.displModeMin
-    #             if self.displMode >= self.displModeMax
-    #             else self.displMode + STEP_1
-    #         )
-
-    #     # Wake up display?
-    #     if self.displSleepMode:
-    #         self.display_on()
-
-    #     # Clear the display
-    #     self._SENSE.clear()
 
     def update_sleep_mode(self, *args):
         """Enable or disable LED sleep mode
@@ -583,20 +562,6 @@ class SenseHat:
         self._SENSE.stick.direction_left = kwargs.get(KWD_BTN_LFT, SenseHat._btn_dummy)
         self._SENSE.stick.direction_right = kwargs.get(KWD_BTN_RHT, SenseHat._btn_dummy)
         self._SENSE.stick.direction_middle = kwargs.get(KWD_BTN_MDL, SenseHat._btn_dummy)
-
-    # def _NUKE_display_init(self, **kwargs):
-    #     """Initialize LED display
-
-    #     We can set/update the number of possible displays by
-    #     using the 'kwargs' to displayMode min/max values.
-
-    #     Args:
-    #         kwargs: optional values for displayMode min/max values
-    #     """
-    #     self.displModeMin = kwargs.get(KWD_DISPLAY_MIN, self.displModeMin)
-    #     self.displModeMax = kwargs.get(KWD_DISPLAY_MAX, self.displModeMax)
-
-    #     self.display_on()
 
     def display_rotate(self, direction):
         """Rotate LED display
