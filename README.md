@@ -6,7 +6,7 @@ The *f451 Labs SenseHat* module encapsulates the drivers for the [*Raspberry Pi 
 
 ## Install
 
-This module is not (yet) available on PyPi. However, you can still use `pip` to install the module directly from Github (see below).
+This module is not (yet) available on PyPi. However, you can still use `pip` to install the module directly from GitHub (see below).
 
 ### Dependencies
 
@@ -18,9 +18,9 @@ NOTE: Only install `sense-hat` library on a device that also has the physical Se
 
 NOTE: You can run this app in demo mode on (almost) any device even without the Sense HAT. It will then create random numbers and can send output to the `logger` when log level is `DEBUG` or when `--debug` flag is used.
 
-### Installing from Github using `pip`
+### Installing from GitHub using `pip`
 
-You can use `pip install` to install this module directly from Github as follows:
+You can use `pip install` to install this module directly from GitHub as follows:
 
 ```bash
 $ pip install 'f451-sensehat @ git+https://github.com/mlanser/f451-sensehat.git'
