@@ -11,10 +11,7 @@ TODO:
  - more/better tests
 
 Dependencies:
- - fonts: https://pypi.org/project/fonts/
- - font-roboto: https://pypi.org/project/font-roboto/
- - Pillow: https://pypi.org/project/Pillow/
- - Raspberry Pi Sense HAT library: https://github.com/pimoroni/enviroplus-python/  
+ - Raspberry Pi Sense HAT library: https://pypi.org/project/sense-hat/
 """
 
 import colorsys
